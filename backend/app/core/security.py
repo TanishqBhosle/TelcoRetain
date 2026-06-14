@@ -4,15 +4,12 @@ Security utilities: JWT token management, bcrypt hashing, token blacklisting.
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 from app.core.config import settings
 import redis.asyncio as aioredis
 import structlog
 
 logger = structlog.get_logger(__name__)
-
-# --- Password Hashing ---
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # --- Redis client (optional) ---
 _redis_client: Optional[aioredis.Redis] = None
@@ -45,12 +42,16 @@ _blacklisted_tokens: set[str] = set()
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plaintext password against a bcrypt hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    if isinstance(hashed_password, str):
+        hashed_password = hashed_password.encode("utf-8")
+    if isinstance(plain_password, str):
+        plain_password = plain_password.encode("utf-8")
+    return bcrypt.checkpw(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
     """Hash a plaintext password using bcrypt."""
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 # ==============================================================

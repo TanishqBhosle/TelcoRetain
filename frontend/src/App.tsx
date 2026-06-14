@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
 import { useAuthStore } from "./state/auth";
+import { api, unwrap } from "./lib/api";
 import { AdminPage } from "./pages/AdminPage";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { AuditLogsPage } from "./pages/AuditLogsPage";
@@ -24,8 +26,24 @@ import { PricingPage } from "./pages/PricingPage";
 import { ContactPage } from "./pages/ContactPage";
 import { PostLogoutPage } from "./pages/PostLogoutPage";
 
+type User = {
+  id: string;
+  email: string;
+  full_name: string;
+  role?: { name: string };
+};
+
 function Protected() {
   const token = useAuthStore((state) => state.accessToken);
+  const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.setUser);
+
+  useEffect(() => {
+    if (token && !user) {
+      unwrap<User>(api.get("/auth/me")).then(setUser).catch(() => {});
+    }
+  }, [token, user, setUser]);
+
   return token ? <AppShell /> : <Navigate to="/signin" replace />;
 }
 

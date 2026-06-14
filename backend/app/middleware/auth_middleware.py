@@ -9,10 +9,11 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 
 from app.core.database import AsyncSessionLocal
 from app.core.security import decode_token, is_token_blacklisted
-from app.models.users import User
+from app.models.users import User, Role
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -40,7 +41,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
                         
                         # 3. Retrieve user from database
                         async with AsyncSessionLocal() as session:
-                            stmt = select(User).where(User.id == user_id)
+                            stmt = (
+                                select(User)
+                                .where(User.id == user_id)
+                                .options(selectinload(User.role))
+                            )
                             result = await session.execute(stmt)
                             user = result.scalar_one_or_none()
                             

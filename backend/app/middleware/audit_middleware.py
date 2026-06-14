@@ -25,7 +25,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
         # Capture request details before processing
         method = request.method
         path = request.url.path
-        timestamp = datetime.datetime.utcnow().isoformat() + "Z"
+        timestamp = datetime.datetime.now(datetime.timezone.utc)
 
         # Read request body (limit to 1 KB for privacy)
         body_bytes = await request.body()
@@ -40,20 +40,22 @@ class AuditMiddleware(BaseHTTPMiddleware):
         user_id = str(user.id) if user else None
 
         # Persist audit entry asynchronously
-        async with AsyncSessionLocal() as session:
-            audit_entry = AuditLog(
-                user_id=user_id,
-                action="request",
-                resource_type="endpoint",
-                resource_id=path,
-                request_payload={"body": truncated_body},
-                response_status=response.status_code,
-                ip_address=request.client.host if request.client else None,
-                user_agent=request.headers.get("User-Agent"),
-                additional_data={"method": method},
-                created_at=timestamp,
-            )
-            session.add(audit_entry)
-            await session.commit()
+        try:
+            async with AsyncSessionLocal() as session:
+                audit_entry = AuditLog(
+                    user_id=user.id if user else None,
+                    action="request",
+                    resource_type="endpoint",
+                    resource_id=path,
+                    request_payload={"body": truncated_body},
+                    response_status=response.status_code,
+                    ip_address=request.client.host if request.client else None,
+                    user_agent=request.headers.get("User-Agent"),
+                    additional_data={"method": method},
+                )
+                session.add(audit_entry)
+                await session.commit()
+        except Exception:
+            pass
 
         return response

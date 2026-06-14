@@ -4,8 +4,10 @@ Analytics & Dashboard Service.
 
 from decimal import Decimal
 import datetime
-from sqlalchemy import select, func, and_, desc
+from sqlalchemy import select, func, and_, desc, literal_column
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.config import settings
 
 from app.models.customers import TelecomCustomer
 from app.models.ml import ChurnPrediction
@@ -101,10 +103,15 @@ class AnalyticsService:
 
     async def get_churn_trends(self) -> DashboardChurnTrendsResponse:
         """Fetch monthly churn aggregates."""
-        # Query monthly averages
+        # Use strftime for SQLite, to_char for PostgreSQL
+        if settings.DATABASE_URL.startswith("sqlite"):
+            month_expr = func.strftime("%Y-%m", ChurnPrediction.prediction_date)
+        else:
+            month_expr = func.to_char(ChurnPrediction.prediction_date, "YYYY-MM")
+
         stmt = (
             select(
-                func.to_char(ChurnPrediction.prediction_date, "YYYY-MM").label("month"),
+                month_expr.label("month"),
                 func.avg(ChurnPrediction.churn_probability),
                 func.count(func.nullif(ChurnPrediction.risk_category != "HIGH", True))
             )
