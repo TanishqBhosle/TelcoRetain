@@ -4,7 +4,7 @@ SQLAlchemy declarative base with UUID primary key mixin.
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import DateTime, func
-from sqlalchemy.dialects.postgresql import UUID
+from app.models.types import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from app.core.database import Base
 

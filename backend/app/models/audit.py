@@ -12,7 +12,7 @@ from sqlalchemy import (
     Boolean, DateTime, ForeignKey, Integer, String, Text, Numeric,
     UniqueConstraint, Index, func,
 )
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from app.models.types import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 from app.models.base import TimestampMixin, UUIDMixin
@@ -97,7 +97,7 @@ class ApiLog(Base, TimestampMixin, UUIDMixin):
         JSONB, nullable=True
     )
     response_status: Mapped[int] = mapped_column(
-        Integer, nullable=False, index=True
+        Integer, nullable=False
     )
     response_time_ms: Mapped[Optional[int]] = mapped_column(
         Integer, nullable=True

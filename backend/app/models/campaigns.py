@@ -13,7 +13,7 @@ from sqlalchemy import (
     Boolean, DateTime, Date, ForeignKey, Integer, String, Text, Numeric,
     UniqueConstraint, Index, func,
 )
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from app.models.types import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 from app.models.base import TimestampMixin, UUIDMixin
@@ -128,7 +128,6 @@ class CampaignTarget(Base, TimestampMixin, UUIDMixin):
 
     __table_args__ = (
         UniqueConstraint("campaign_id", "customer_id", name="uq_campaign_customer"),
-        Index("ix_campaign_targets_status", "status"),
     )
 
     def __repr__(self) -> str:
