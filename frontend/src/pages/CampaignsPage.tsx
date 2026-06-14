@@ -1,7 +1,9 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Megaphone, Plus } from "lucide-react";
 import { StatusPill } from "../components/StatusPill";
+import { FadeIn, StaggerContainer, staggerItem } from "../components/animations";
 import { api, unwrap } from "../lib/api";
 
 type Campaign = {
@@ -45,45 +47,57 @@ export function CampaignsPage() {
 
   return (
     <section className="page">
-      <div className="page-title">
-        <h1>Campaigns</h1>
-        <Megaphone size={24} />
-      </div>
-      <form className="inline-form" onSubmit={createCampaign}>
-        <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Campaign name" />
-        <button className="primary-button"><Plus size={16} /> Create</button>
-      </form>
-      <div className="table-panel">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Window</th>
-              <th>Segment</th>
-              <th>Targets</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {campaigns.map((campaign) => (
-              <tr key={campaign.id}>
-                <td>
-                  <Link to={`/campaigns/${campaign.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                    <strong style={{ color: "#1d8a8a" }}>{campaign.name}</strong>
-                  </Link>
-                </td>
-                <td>{campaign.campaign_type}</td>
-                <td>{campaign.start_date} to {campaign.end_date}</td>
-                <td>{campaign.target_segment ?? "-"}</td>
-                <td>{campaign.actual_customers ?? 0}</td>
-                <td><StatusPill value={campaign.is_active ? "Active" : "Inactive"} /></td>
+      <FadeIn>
+        <div className="page-title">
+          <h1>Campaigns</h1>
+          <Megaphone size={24} />
+        </div>
+      </FadeIn>
+
+      <FadeIn delay={0.1}>
+        <form className="inline-form" onSubmit={createCampaign}>
+          <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Campaign name" />
+          <motion.button className="primary-button" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+            <Plus size={16} /> Create
+          </motion.button>
+        </form>
+      </FadeIn>
+
+      <FadeIn delay={0.2}>
+        <div className="table-panel">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Window</th>
+                <th>Segment</th>
+                <th>Targets</th>
+                <th>Status</th>
               </tr>
-            ))}
-            {!campaigns.length ? <tr><td colSpan={6} className="empty">No campaigns found</td></tr> : null}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              <StaggerContainer stagger={0.04}>
+                {campaigns.map((campaign) => (
+                  <motion.tr key={campaign.id} variants={staggerItem}>
+                    <td>
+                      <Link to={`/campaigns/${campaign.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                        <strong style={{ color: "#1d8a8a" }}>{campaign.name}</strong>
+                      </Link>
+                    </td>
+                    <td>{campaign.campaign_type}</td>
+                    <td>{campaign.start_date} to {campaign.end_date}</td>
+                    <td>{campaign.target_segment ?? "-"}</td>
+                    <td>{campaign.actual_customers ?? 0}</td>
+                    <td><StatusPill value={campaign.is_active ? "Active" : "Inactive"} /></td>
+                  </motion.tr>
+                ))}
+              </StaggerContainer>
+              {!campaigns.length ? <tr><td colSpan={6} className="empty">No campaigns found</td></tr> : null}
+            </tbody>
+          </table>
+        </div>
+      </FadeIn>
     </section>
   );
 }

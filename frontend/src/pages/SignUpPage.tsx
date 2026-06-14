@@ -1,37 +1,26 @@
 import { FormEvent, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Cable } from "lucide-react";
 import { api, unwrap } from "../lib/api";
-import { useAuthStore } from "../state/auth";
-
-type User = {
-  id: string;
-  email: string;
-  full_name: string;
-  role?: { name: string };
-};
 
 export function SignUpPage() {
-  const { accessToken, setSession } = useAuthStore();
+  const navigate = useNavigate();
+  const [full_name, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
-
-  if (accessToken) return <Navigate to="/" replace />;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     setLoading(true);
     setError("");
-    setSuccess("");
     try {
-      await unwrap<User>(api.post("/auth/register", { email, password, full_name: fullName }));
-      setSuccess("Account created! Please check your email to verify your account.");
+      await api.post("/auth/register", { full_name, email, password });
+      navigate("/signin");
     } catch {
-      setError("Registration failed. The email may already be in use.");
+      setError("Registration failed. Email may already be in use.");
     } finally {
       setLoading(false);
     }
@@ -39,33 +28,55 @@ export function SignUpPage() {
 
   return (
     <main className="auth-screen">
-      <section className="auth-panel">
-        <div className="brand auth-brand">
+      <motion.section
+        className="auth-panel"
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+      >
+        <motion.div
+          className="brand auth-brand"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+        >
           <Cable size={26} />
           <span>Telco Retain</span>
-        </div>
-        <h2 style={{ margin: "0 0 18px", fontSize: 18 }}>Create Account</h2>
+        </motion.div>
         <form onSubmit={submit} className="form">
-          <label>
+          <motion.label initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25, duration: 0.3 }}>
             Full Name
-            <input value={fullName} onChange={(e) => setFullName(e.target.value)} type="text" autoComplete="name" required />
-          </label>
-          <label>
+            <input value={full_name} onChange={(e) => setFullName(e.target.value)} type="text" required />
+          </motion.label>
+          <motion.label initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.3 }}>
             Email
-            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" autoComplete="email" required />
-          </label>
-          <label>
+            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required autoComplete="email" />
+          </motion.label>
+          <motion.label initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35, duration: 0.3 }}>
             Password
-            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" autoComplete="new-password" minLength={8} required />
-          </label>
-          {error && <p className="error-text">{error}</p>}
-          {success && <p style={{ color: "#146b45", fontSize: 13, margin: 0 }}>{success}</p>}
-          <button className="primary-button" disabled={loading}>{loading ? "Creating account..." : "Sign up"}</button>
+            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required autoComplete="new-password" />
+          </motion.label>
+          {error ? (
+            <motion.p className="error-text" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}>{error}</motion.p>
+          ) : null}
+          <motion.button
+            className="primary-button"
+            disabled={loading}
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {loading ? "Creating account" : "Create account"}
+          </motion.button>
         </form>
-        <p style={{ textAlign: "center", marginTop: 16, fontSize: 13, color: "#64746f" }}>
+        <motion.p
+          style={{ textAlign: "center", marginTop: 16, fontSize: 13, color: "#64746f" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
           Already have an account? <Link to="/signin" style={{ color: "#1d8a8a", fontWeight: 700 }}>Sign in</Link>
-        </p>
-      </section>
+        </motion.p>
+      </motion.section>
     </main>
   );
 }

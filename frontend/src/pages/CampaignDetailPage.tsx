@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { StatusPill } from "../components/StatusPill";
 import { MetricCard } from "../components/MetricCard";
+import { FadeIn, StaggerContainer, staggerItem } from "../components/animations";
 import { api, unwrap } from "../lib/api";
 
 type Campaign = {
@@ -67,105 +69,116 @@ export function CampaignDetailPage() {
 
   return (
     <section className="page">
-      <Link to="/campaigns" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#64746f", textDecoration: "none", marginBottom: 8 }}>
-        <ArrowLeft size={16} /> Back to Campaigns
-      </Link>
+      <FadeIn>
+        <Link to="/campaigns" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#64746f", textDecoration: "none", marginBottom: 8 }}>
+          <ArrowLeft size={16} /> Back to Campaigns
+        </Link>
 
-      <div className="page-title">
-        <h1>{campaign.name}</h1>
-        <StatusPill value={campaign.is_active ? "Active" : "Inactive"} />
-      </div>
+        <div className="page-title">
+          <h1>{campaign.name}</h1>
+          <StatusPill value={campaign.is_active ? "Active" : "Inactive"} />
+        </div>
 
-      {campaign.description && <p style={{ color: "#64746f", marginTop: -8 }}>{campaign.description}</p>}
+        {campaign.description && <p style={{ color: "#64746f", marginTop: -8 }}>{campaign.description}</p>}
+      </FadeIn>
 
-      <div className="metric-grid compact-metrics">
-        <MetricCard label="Type" value={campaign.campaign_type} />
-        <MetricCard label="Budget" value={`$${Number(campaign.budget ?? 0).toLocaleString()}`} />
-        <MetricCard label="Targets" value={String(result?.total_targets ?? campaign.actual_customers ?? 0)} />
-        <MetricCard label="Response Rate" value={`${responseRate.toFixed(1)}%`} />
-        <MetricCard label="Conversions" value={String(result?.conversions ?? 0)} />
-        <MetricCard label="ROI" value={result ? `${result.roi.toFixed(1)}%` : "-"} />
-      </div>
+      <StaggerContainer stagger={0.08}>
+        <motion.div className="metric-grid compact-metrics" variants={staggerItem}>
+          <MetricCard label="Type" value={campaign.campaign_type} />
+          <MetricCard label="Budget" value={`$${Number(campaign.budget ?? 0).toLocaleString()}`} />
+          <MetricCard label="Targets" value={String(result?.total_targets ?? campaign.actual_customers ?? 0)} />
+          <MetricCard label="Response Rate" value={`${responseRate.toFixed(1)}%`} />
+          <MetricCard label="Conversions" value={String(result?.conversions ?? 0)} />
+          <MetricCard label="ROI" value={result ? `${result.roi.toFixed(1)}%` : "-"} />
+        </motion.div>
+      </StaggerContainer>
 
       <div className="two-column">
-        <div className="panel">
-          <div className="panel-header">
-            <h2>Campaign Details</h2>
-          </div>
-          <div style={{ display: "grid", gap: 10, padding: "12px 0" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #e7eee9", padding: "6px 0" }}>
-              <span style={{ color: "#64746f", fontSize: 13 }}>Start Date</span>
-              <span style={{ fontWeight: 600, fontSize: 13 }}>{campaign.start_date}</span>
+        <FadeIn delay={0.3}>
+          <div className="panel">
+            <div className="panel-header">
+              <h2>Campaign Details</h2>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #e7eee9", padding: "6px 0" }}>
-              <span style={{ color: "#64746f", fontSize: 13 }}>End Date</span>
-              <span style={{ fontWeight: 600, fontSize: 13 }}>{campaign.end_date}</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #e7eee9", padding: "6px 0" }}>
-              <span style={{ color: "#64746f", fontSize: 13 }}>Target Segment</span>
-              <span style={{ fontWeight: 600, fontSize: 13 }}>{campaign.target_segment ?? "-"}</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #e7eee9", padding: "6px 0" }}>
-              <span style={{ color: "#64746f", fontSize: 13 }}>Expected Customers</span>
-              <span style={{ fontWeight: 600, fontSize: 13 }}>{campaign.expected_customers ?? "-"}</span>
-            </div>
-          </div>
-
-          {result && (
-            <div style={{ padding: "12px 0", borderTop: "1px solid #dbe5df" }}>
-              <h3 style={{ fontSize: 14, marginBottom: 10 }}>Financial Results</h3>
-              <div style={{ display: "grid", gap: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
-                  <span style={{ color: "#64746f", fontSize: 13 }}>Revenue Impact</span>
-                  <span style={{ fontWeight: 700, fontSize: 13, color: "#146b45" }}>${Number(result.revenue_impact ?? 0).toLocaleString()}</span>
+            <div style={{ display: "grid", gap: 10, padding: "12px 0" }}>
+              {[
+                { label: "Start Date", value: campaign.start_date },
+                { label: "End Date", value: campaign.end_date },
+                { label: "Target Segment", value: campaign.target_segment ?? "-" },
+                { label: "Expected Customers", value: campaign.expected_customers ?? "-" },
+              ].map((item) => (
+                <div key={item.label} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #e7eee9", padding: "6px 0" }}>
+                  <span style={{ color: "#64746f", fontSize: 13 }}>{item.label}</span>
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>{item.value}</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
-                  <span style={{ color: "#64746f", fontSize: 13 }}>Campaign Cost</span>
-                  <span style={{ fontWeight: 700, fontSize: 13 }}>${Number(result.cost ?? 0).toLocaleString()}</span>
+              ))}
+            </div>
+
+            {result && (
+              <div style={{ padding: "12px 0", borderTop: "1px solid #dbe5df" }}>
+                <h3 style={{ fontSize: 14, marginBottom: 10 }}>Financial Results</h3>
+                <div style={{ display: "grid", gap: 8 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
+                    <span style={{ color: "#64746f", fontSize: 13 }}>Revenue Impact</span>
+                    <span style={{ fontWeight: 700, fontSize: 13, color: "#146b45" }}>${Number(result.revenue_impact ?? 0).toLocaleString()}</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
+                    <span style={{ color: "#64746f", fontSize: 13 }}>Campaign Cost</span>
+                    <span style={{ fontWeight: 700, fontSize: 13 }}>${Number(result.cost ?? 0).toLocaleString()}</span>
+                  </div>
                 </div>
               </div>
+            )}
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={0.4}>
+          <div className="panel">
+            <div className="panel-header">
+              <h2>Target Pipeline</h2>
             </div>
-          )}
-        </div>
-
-        <div className="panel">
-          <div className="panel-header">
-            <h2>Target Pipeline</h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, padding: "16px 0" }}>
-            {(["pending", "sent", "delivered", "responded"] as const).map((status) => (
-              <div key={status} style={{ textAlign: "center", padding: 12, background: "#f8faf9", borderRadius: 8, border: "1px solid #e7eee9" }}>
-                <div style={{ fontSize: 24, fontWeight: 800, color: "#1d8a8a" }}>{statusCounts[status]}</div>
-                <div style={{ fontSize: 12, color: "#64746f", textTransform: "capitalize" }}>{status}</div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ padding: "0 0 12px" }}>
-            <h3 style={{ fontSize: 14, marginBottom: 10 }}>Target Customers</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Customer ID</th>
-                  <th>Status</th>
-                  <th>Offer Accepted</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(campaign.targets || []).slice(0, 10).map((target) => (
-                  <tr key={target.id}>
-                    <td><code style={{ fontSize: 12 }}>{target.customer_id.slice(0, 8)}...</code></td>
-                    <td><StatusPill value={target.status} /></td>
-                    <td>{target.offer_accepted ? "Yes" : target.offer_accepted === false ? "No" : "-"}</td>
-                  </tr>
+            <StaggerContainer stagger={0.06}>
+              <motion.div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, padding: "16px 0" }} variants={staggerItem}>
+                {(["pending", "sent", "delivered", "responded"] as const).map((status) => (
+                  <motion.div
+                    key={status}
+                    whileHover={{ y: -2, boxShadow: "0 4px 12px rgba(0,0,0,0.06)" }}
+                    style={{ textAlign: "center", padding: 12, background: "#f8faf9", borderRadius: 8, border: "1px solid #e7eee9" }}
+                  >
+                    <div style={{ fontSize: 24, fontWeight: 800, color: "#1d8a8a" }}>{statusCounts[status]}</div>
+                    <div style={{ fontSize: 12, color: "#64746f", textTransform: "capitalize" }}>{status}</div>
+                  </motion.div>
                 ))}
-                {(!campaign.targets || campaign.targets.length === 0) && (
-                  <tr><td colSpan={3} className="empty">No targets assigned</td></tr>
-                )}
-              </tbody>
-            </table>
+              </motion.div>
+            </StaggerContainer>
+
+            <div style={{ padding: "0 0 12px" }}>
+              <h3 style={{ fontSize: 14, marginBottom: 10 }}>Target Customers</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Customer ID</th>
+                    <th>Status</th>
+                    <th>Offer Accepted</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <StaggerContainer stagger={0.03}>
+                    {(campaign.targets || []).slice(0, 10).map((target) => (
+                      <motion.tr key={target.id} variants={staggerItem}>
+                        <td><code style={{ fontSize: 12 }}>{target.customer_id.slice(0, 8)}...</code></td>
+                        <td><StatusPill value={target.status} /></td>
+                        <td>{target.offer_accepted ? "Yes" : target.offer_accepted === false ? "No" : "-"}</td>
+                      </motion.tr>
+                    ))}
+                  </StaggerContainer>
+                  {(!campaign.targets || campaign.targets.length === 0) && (
+                    <tr><td colSpan={3} className="empty">No targets assigned</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </FadeIn>
       </div>
     </section>
   );

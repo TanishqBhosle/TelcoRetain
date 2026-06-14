@@ -1,7 +1,9 @@
 import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { BrainCircuit } from "lucide-react";
 import { StatusPill } from "../components/StatusPill";
+import { FadeIn, ScaleIn } from "../components/animations";
 import { api, unwrap } from "../lib/api";
 
 type Prediction = {
@@ -54,34 +56,45 @@ export function PredictionPage() {
 
   return (
     <section className="page">
-      <div className="page-title">
-        <h1>Churn Prediction</h1>
-        <BrainCircuit size={22} />
-      </div>
+      <FadeIn>
+        <div className="page-title">
+          <h1>Churn Prediction</h1>
+          <BrainCircuit size={22} />
+        </div>
+      </FadeIn>
 
-      <div style={{ display: "flex", gap: 4, borderBottom: "1px solid #dbe5df", marginBottom: 0 }}>
-        {(["single", "bulk"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            style={{
-              padding: "10px 16px",
-              border: "none",
-              background: activeTab === tab ? "#1d8a8a" : "transparent",
-              color: activeTab === tab ? "#fff" : "#64746f",
-              fontWeight: 700,
-              fontSize: 13,
-              cursor: "pointer",
-              borderRadius: "8px 8px 0 0",
-            }}
-          >
-            {tab === "single" ? "Single Prediction" : "Bulk Prediction"}
-          </button>
-        ))}
-      </div>
+      <FadeIn delay={0.1}>
+        <div style={{ display: "flex", gap: 4, borderBottom: "1px solid #dbe5df", marginBottom: 0 }}>
+          {(["single", "bulk"] as const).map((tab) => (
+            <motion.button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              whileHover={{ backgroundColor: activeTab === tab ? "#1d8a8a" : "#e8eee9" }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                padding: "10px 16px",
+                border: "none",
+                background: activeTab === tab ? "#1d8a8a" : "transparent",
+                color: activeTab === tab ? "#fff" : "#64746f",
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: "pointer",
+                borderRadius: "8px 8px 0 0",
+              }}
+            >
+              {tab === "single" ? "Single Prediction" : "Bulk Prediction"}
+            </motion.button>
+          ))}
+        </div>
+      </FadeIn>
 
       {activeTab === "single" && (
-        <div className="two-column">
+        <motion.div
+          className="two-column"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <div className="panel">
             <div className="panel-header"><h2>Customer Prediction</h2></div>
             <form className="form compact" onSubmit={submitSingle}>
@@ -89,7 +102,7 @@ export function PredictionPage() {
                 Customer UUID
                 <input value={customerId} onChange={(e) => setCustomerId(e.target.value)} placeholder="00000000-0000-0000-0000-000000000000" />
               </label>
-              <button className="primary-button">Run prediction</button>
+              <motion.button className="primary-button" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>Run prediction</motion.button>
             </form>
             {error && <p className="error-text">{error}</p>}
           </div>
@@ -99,24 +112,32 @@ export function PredictionPage() {
               {prediction && <StatusPill value={prediction.risk_category} />}
             </div>
             {prediction ? (
-              <div className="result-grid">
-                <span>Risk score</span><strong>{prediction.risk_score}</strong>
-                <span>Probability</span><strong>{Math.round(prediction.churn_probability * 100)}%</strong>
-                <span>Confidence</span><strong>{Math.round((prediction.confidence_score ?? 0) * 100)}%</strong>
-                <span>Prediction ID</span>
-                <Link to={`/predict/${prediction.id}`} style={{ color: "#1d8a8a", fontWeight: 600, fontSize: 13 }}>
-                  View Details
-                </Link>
-              </div>
+              <ScaleIn>
+                <div className="result-grid">
+                  <span>Risk score</span><strong>{prediction.risk_score}</strong>
+                  <span>Probability</span><strong>{Math.round(prediction.churn_probability * 100)}%</strong>
+                  <span>Confidence</span><strong>{Math.round((prediction.confidence_score ?? 0) * 100)}%</strong>
+                  <span>Prediction ID</span>
+                  <Link to={`/predict/${prediction.id}`} style={{ color: "#1d8a8a", fontWeight: 600, fontSize: 13 }}>
+                    View Details
+                  </Link>
+                </div>
+              </ScaleIn>
             ) : (
               <p className="empty">No prediction selected</p>
             )}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {activeTab === "bulk" && (
-        <div className="panel" style={{ maxWidth: 600 }}>
+        <motion.div
+          className="panel"
+          style={{ maxWidth: 600 }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <div className="panel-header"><h2>Bulk Prediction</h2></div>
           <form className="form compact" onSubmit={submitBulk}>
             <label>
@@ -129,17 +150,19 @@ export function PredictionPage() {
                 placeholder={"00000000-0000-0000-0000-000000000001\n00000000-0000-0000-0000-000000000002"}
               />
             </label>
-            <button className="primary-button">Run bulk prediction</button>
+            <motion.button className="primary-button" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>Run bulk prediction</motion.button>
           </form>
           {error && <p className="error-text">{error}</p>}
           {bulkResult && (
-            <div className="result-grid" style={{ marginTop: 14 }}>
-              <span>Total processed</span><strong>{bulkResult.total_processed}</strong>
-              <span>Successful</span><strong style={{ color: "#146b45" }}>{bulkResult.success_count}</strong>
-              <span>Failed</span><strong style={{ color: "#9d2340" }}>{bulkResult.failure_count}</strong>
-            </div>
+            <ScaleIn>
+              <div className="result-grid" style={{ marginTop: 14 }}>
+                <span>Total processed</span><strong>{bulkResult.total_processed}</strong>
+                <span>Successful</span><strong style={{ color: "#146b45" }}>{bulkResult.success_count}</strong>
+                <span>Failed</span><strong style={{ color: "#9d2340" }}>{bulkResult.failure_count}</strong>
+              </div>
+            </ScaleIn>
           )}
-        </div>
+        </motion.div>
       )}
     </section>
   );

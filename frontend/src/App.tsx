@@ -18,6 +18,11 @@ import { PasswordResetRequestPage } from "./pages/PasswordResetRequestPage";
 import { SignInPage } from "./pages/SignInPage";
 import { SignUpPage } from "./pages/SignUpPage";
 import { VerifyEmailPage } from "./pages/VerifyEmailPage";
+import { LandingPage } from "./pages/LandingPage";
+import { AboutPage } from "./pages/AboutPage";
+import { PricingPage } from "./pages/PricingPage";
+import { ContactPage } from "./pages/ContactPage";
+import { PostLogoutPage } from "./pages/PostLogoutPage";
 
 function Protected() {
   const token = useAuthStore((state) => state.accessToken);
@@ -27,13 +32,23 @@ function Protected() {
 export default function App() {
   return (
     <Routes>
+      {/* Public marketing pages */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+
+      {/* Auth pages */}
       <Route path="/signin" element={<SignInPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/password-reset" element={<PasswordResetRequestPage />} />
       <Route path="/password-reset/confirm" element={<PasswordResetConfirmPage />} />
+      <Route path="/post-logout" element={<PostLogoutPage />} />
+
+      {/* Protected app pages */}
       <Route element={<Protected />}>
-        <Route index element={<DashboardPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/customers" element={<CustomersPage />} />
         <Route path="/customers/:id" element={<CustomerDetailPage />} />
         <Route path="/predict" element={<PredictionPage />} />

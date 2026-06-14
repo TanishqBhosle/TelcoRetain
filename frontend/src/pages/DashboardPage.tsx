@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { motion } from "framer-motion";
 import { MetricCard } from "../components/MetricCard";
+import { FadeIn, StaggerContainer, staggerItem } from "../components/animations";
 import { api, unwrap } from "../lib/api";
 
 type Kpis = {
@@ -27,37 +29,50 @@ export function DashboardPage() {
 
   return (
     <section className="page">
-      <div className="page-title">
-        <h1>Retention Dashboard</h1>
-      </div>
-      <div className="metric-grid">
-        <MetricCard label="Customers" value={String(kpis?.total_customers ?? 0)} />
-        <MetricCard label="Active" value={String(kpis?.active_customers ?? 0)} />
-        <MetricCard label="Average Risk" value={`${Math.round((kpis?.average_churn_probability ?? 0) * 100)}%`} />
-        <MetricCard label="Revenue At Risk" value={`$${Number(kpis?.revenue_at_risk ?? 0).toLocaleString()}`} />
-        <MetricCard label="Campaigns" value={String(kpis?.active_campaigns_count ?? 0)} />
-        <MetricCard label="Conversion" value={`${Math.round((kpis?.campaign_conversion_rate ?? 0) * 100)}%`} />
-      </div>
-      <div className="panel tall">
-        <div className="panel-header">
-          <h2>Churn Trend</h2>
+      <FadeIn>
+        <div className="page-title">
+          <h1>Retention Dashboard</h1>
         </div>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={trends}>
-            <defs>
-              <linearGradient id="risk" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#1d8a8a" stopOpacity={0.45} />
-                <stop offset="95%" stopColor="#1d8a8a" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#d9e2dc" />
-            <XAxis dataKey="period" />
-            <YAxis />
-            <Tooltip />
-            <Area type="monotone" dataKey="average_churn_probability" stroke="#1d8a8a" fill="url(#risk)" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      </FadeIn>
+
+      <StaggerContainer stagger={0.08}>
+        <motion.div className="metric-grid" variants={staggerItem}>
+          <MetricCard label="Customers" value={String(kpis?.total_customers ?? 0)} />
+          <MetricCard label="Active" value={String(kpis?.active_customers ?? 0)} />
+          <MetricCard label="Average Risk" value={`${Math.round((kpis?.average_churn_probability ?? 0) * 100)}%`} />
+          <MetricCard label="Revenue At Risk" value={`$${Number(kpis?.revenue_at_risk ?? 0).toLocaleString()}`} />
+          <MetricCard label="Campaigns" value={String(kpis?.active_campaigns_count ?? 0)} />
+          <MetricCard label="Conversion" value={`${Math.round((kpis?.campaign_conversion_rate ?? 0) * 100)}%`} />
+        </motion.div>
+      </StaggerContainer>
+
+      <FadeIn delay={0.35}>
+        <motion.div
+          className="panel tall"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+        >
+          <div className="panel-header">
+            <h2>Churn Trend</h2>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={trends}>
+              <defs>
+                <linearGradient id="risk" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#1d8a8a" stopOpacity={0.45} />
+                  <stop offset="95%" stopColor="#1d8a8a" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#d9e2dc" />
+              <XAxis dataKey="period" />
+              <YAxis />
+              <Tooltip />
+              <Area type="monotone" dataKey="average_churn_probability" stroke="#1d8a8a" fill="url(#risk)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </motion.div>
+      </FadeIn>
     </section>
   );
 }

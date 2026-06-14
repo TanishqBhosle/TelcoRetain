@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import { StatusPill } from "../components/StatusPill";
+import { FadeIn, StaggerContainer, staggerItem } from "../components/animations";
 import { api, unwrap } from "../lib/api";
 
 type Customer = {
@@ -38,50 +40,62 @@ export function CustomersPage() {
 
   return (
     <section className="page">
-      <div className="page-title">
-        <h1>Customer Explorer</h1>
-        <div className="search-box">
-          <Search size={16} />
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search customers" />
+      <FadeIn>
+        <div className="page-title">
+          <h1>Customer Explorer</h1>
+          <motion.div
+            className="search-box"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+          >
+            <Search size={16} />
+            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search customers" />
+          </motion.div>
         </div>
-      </div>
-      <div className="table-panel">
-        <div className="table-meta">{total} records</div>
-        <table>
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Phone</th>
-              <th>Operator</th>
-              <th>Region</th>
-              <th>ARPU</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {customers.map((customer) => (
-              <tr key={customer.id}>
-                <td>
-                  <Link to={`/customers/${customer.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-                    <strong style={{ color: "#1d8a8a" }}>{customer.full_name}</strong>
-                  </Link>
-                  <span>{customer.customer_id}</span>
-                </td>
-                <td>{customer.phone_number}</td>
-                <td>{customer.operator ?? "-"}</td>
-                <td>{customer.region ?? "-"}</td>
-                <td>${Number(customer.arpu ?? 0).toLocaleString()}</td>
-                <td><StatusPill value={customer.churn_status ? "Churned" : customer.status} /></td>
-              </tr>
-            ))}
-            {!customers.length ? (
+      </FadeIn>
+
+      <FadeIn delay={0.15}>
+        <div className="table-panel">
+          <div className="table-meta">{total} records</div>
+          <table>
+            <thead>
               <tr>
-                <td colSpan={6} className="empty">No customers found</td>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Operator</th>
+                <th>Region</th>
+                <th>ARPU</th>
+                <th>Status</th>
               </tr>
-            ) : null}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              <StaggerContainer stagger={0.03}>
+                {customers.map((customer) => (
+                  <motion.tr key={customer.id} variants={staggerItem}>
+                    <td>
+                      <Link to={`/customers/${customer.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                        <strong style={{ color: "#1d8a8a" }}>{customer.full_name}</strong>
+                      </Link>
+                      <span>{customer.customer_id}</span>
+                    </td>
+                    <td>{customer.phone_number}</td>
+                    <td>{customer.operator ?? "-"}</td>
+                    <td>{customer.region ?? "-"}</td>
+                    <td>${Number(customer.arpu ?? 0).toLocaleString()}</td>
+                    <td><StatusPill value={customer.churn_status ? "Churned" : customer.status} /></td>
+                  </motion.tr>
+                ))}
+              </StaggerContainer>
+              {!customers.length ? (
+                <tr>
+                  <td colSpan={6} className="empty">No customers found</td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+      </FadeIn>
     </section>
   );
 }
