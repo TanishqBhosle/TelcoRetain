@@ -5,7 +5,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends
 
-from app.dependencies.auth import get_current_user, get_db
+from app.dependencies.auth import get_current_user, get_db, require_role
 from app.repositories.customer_repo import CustomerRepository
 from app.repositories.prediction_repo import PredictionRepository
 from app.repositories.recommendation_repo import RecommendationRepository
@@ -14,6 +14,9 @@ from app.schemas.recommendations import OfferGenerateRequest, RecommendationResp
 from app.services.recommendation_service import RecommendationService
 
 router = APIRouter(tags=["Recommendations"])
+
+RECOMMENDATION_WRITE_ROLES = ["Super Admin", "Admin", "Retention Manager"]
+RECOMMENDATION_READ_ROLES = ["Super Admin", "Admin", "Retention Manager", "Marketing Manager", "Customer Support Executive"]
 
 
 async def get_recommendation_service(db=Depends(get_db)) -> RecommendationService:
@@ -24,7 +27,7 @@ async def get_recommendation_service(db=Depends(get_db)) -> RecommendationServic
 async def generate_recommendations(
     payload: OfferGenerateRequest,
     service: RecommendationService = Depends(get_recommendation_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(RECOMMENDATION_WRITE_ROLES)),
 ):
     recommendations = await service.generate_recommendations(payload.customer_id)
     return APIResponse(
@@ -38,7 +41,7 @@ async def generate_recommendations(
 async def recommendation_detail(
     id: uuid.UUID,
     service: RecommendationService = Depends(get_recommendation_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(RECOMMENDATION_READ_ROLES)),
 ):
     rec = await service.rec_repo.get_by_id(id)
     if rec is None:
@@ -53,7 +56,7 @@ async def update_recommendation(
     id: uuid.UUID,
     payload: RecommendationUpdate,
     service: RecommendationService = Depends(get_recommendation_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(RECOMMENDATION_WRITE_ROLES)),
 ):
     rec = await service.update_recommendation_status(id, payload)
     return APIResponse(success=True, message="Recommendation updated", data=RecommendationResponse.model_validate(rec))

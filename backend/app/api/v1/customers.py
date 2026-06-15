@@ -6,7 +6,7 @@ import uuid
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, status
 
-from app.dependencies.auth import get_db, get_current_user
+from app.dependencies.auth import get_db, get_current_user, require_role
 from app.repositories.customer_repo import CustomerRepository
 from app.repositories.recharge_repo import RechargeHistoryRepository
 from app.repositories.support_repo import SupportTicketRepository
@@ -20,6 +20,9 @@ from app.schemas.customers import (
 from app.schemas.common import APIResponse, PaginatedData
 
 router = APIRouter(tags=["Customers"])
+
+BUSINESS_ROLES = ["Super Admin", "Admin", "Retention Manager", "Marketing Manager", "Business Analyst", "Customer Support Executive", "Executive Viewer"]
+CUSTOMER_READ_ROLES = ["Super Admin", "Admin", "Retention Manager", "Business Analyst", "Customer Support Executive"]
 
 
 async def get_customer_service(db=Depends(get_db)) -> CustomerService:
@@ -36,7 +39,7 @@ async def list_customers(
     risk_level: Optional[str] = Query(None, description="Filter by latest prediction risk (LOW, MEDIUM, HIGH)"),
     search: Optional[str] = Query(None, description="Search term for names, IDs, phone, email"),
     customer_service: CustomerService = Depends(get_customer_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(CUSTOMER_READ_ROLES)),
 ):
     """Retrieves a paginated list of customers matching query filters."""
     items, total = await customer_service.list_customers(
@@ -68,7 +71,7 @@ async def list_customers(
 async def create_customer(
     payload: TelecomCustomerCreate,
     customer_service: CustomerService = Depends(get_customer_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(["Super Admin", "Admin", "Retention Manager"])),
 ):
     """Registers a new telecom customer master record."""
     customer = await customer_service.create_customer(payload)
@@ -83,7 +86,7 @@ async def create_customer(
 async def get_customer_details(
     id: uuid.UUID,
     customer_service: CustomerService = Depends(get_customer_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(CUSTOMER_READ_ROLES)),
 ):
     """Fetches details of a single customer, including historical behaviors."""
     customer = await customer_service.get_customer(id)
@@ -99,7 +102,7 @@ async def update_customer(
     id: uuid.UUID,
     payload: TelecomCustomerUpdate,
     customer_service: CustomerService = Depends(get_customer_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(["Super Admin", "Admin", "Retention Manager"])),
 ):
     """Updates properties on a customer master profile."""
     customer = await customer_service.update_customer(id, payload)
@@ -114,7 +117,7 @@ async def update_customer(
 async def get_customer_timeline(
     id: uuid.UUID,
     customer_service: CustomerService = Depends(get_customer_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(CUSTOMER_READ_ROLES)),
 ):
     """Fetches chronological activity events log for a customer."""
     timeline = await customer_service.get_customer_timeline(id)
@@ -130,7 +133,7 @@ async def get_customer_timeline(
 async def get_customer_usage(
     id: uuid.UUID,
     db=Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(CUSTOMER_READ_ROLES)),
 ):
     """Fetches usage history for a customer profile."""
     items = await UsageMetricsRepository(db).get_by_customer_id(id)
@@ -145,7 +148,7 @@ async def get_customer_usage(
 async def get_customer_complaints(
     id: uuid.UUID,
     db=Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(CUSTOMER_READ_ROLES)),
 ):
     """Fetches support tickets and complaints for a customer profile."""
     items = await SupportTicketRepository(db).get_by_customer_id(id)
@@ -160,7 +163,7 @@ async def get_customer_complaints(
 async def get_customer_recharge_history(
     id: uuid.UUID,
     db=Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(CUSTOMER_READ_ROLES)),
 ):
     """Fetches recharge transaction history for a customer profile."""
     items = await RechargeHistoryRepository(db).get_by_customer_id(id)

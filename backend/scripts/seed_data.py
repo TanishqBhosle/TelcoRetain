@@ -14,10 +14,60 @@ from sqlalchemy import select
 
 
 ROLE_PERMISSIONS = {
-    "Admin": ["users:read", "users:write", "models:write", "audit:read", "customers:read", "predictions:write"],
-    "Analyst": ["customers:read", "predictions:write", "models:read", "dashboard:read"],
-    "Retention Manager": ["customers:read", "recommendations:write", "campaigns:write", "dashboard:read"],
-    "Marketing Manager": ["campaigns:write", "recommendations:read", "dashboard:read"],
+    "Super Admin": [
+        "admin:full_access",
+        "users:create", "users:read", "users:update", "users:delete",
+        "roles:manage",
+        "models:read", "models:write", "models:retrain", "models:activate",
+        "datasets:read", "datasets:write",
+        "audit:read",
+        "system:settings", "system:health",
+        "customers:read",
+        "predictions:read", "predictions:write",
+        "campaigns:read", "campaigns:write",
+        "recommendations:read", "recommendations:write",
+        "analytics:read",
+        "reports:read", "reports:export",
+    ],
+    "Admin": [
+        "users:create", "users:read", "users:update", "users:delete",
+        "roles:read",
+        "models:read", "models:write", "models:retrain", "models:activate",
+        "datasets:read", "datasets:write",
+        "audit:read",
+        "system:health",
+        "customers:read",
+    ],
+    "Retention Manager": [
+        "customers:read",
+        "predictions:read", "predictions:write",
+        "recommendations:read", "recommendations:write",
+        "campaigns:read", "campaigns:write",
+        "analytics:read",
+        "dashboard:read",
+    ],
+    "Marketing Manager": [
+        "campaigns:read", "campaigns:write",
+        "recommendations:read",
+        "analytics:read",
+        "dashboard:read",
+    ],
+    "Business Analyst": [
+        "analytics:read",
+        "reports:read", "reports:export",
+        "customers:read",
+        "dashboard:read",
+    ],
+    "Customer Support Executive": [
+        "customers:read",
+        "predictions:read",
+        "recommendations:read",
+    ],
+    "Executive Viewer": [
+        "dashboard:read",
+        "reports:read",
+        "analytics:read",
+    ],
 }
 
 
@@ -65,7 +115,7 @@ async def seed() -> None:
             User,
             email=settings.FIRST_ADMIN_EMAIL,
             defaults={
-                "role_id": roles["Admin"].id,
+                "role_id": roles["Super Admin"].id,
                 "full_name": settings.FIRST_ADMIN_NAME,
                 "password_hash": get_password_hash(settings.FIRST_ADMIN_PASSWORD),
                 "is_active": True,

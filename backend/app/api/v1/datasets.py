@@ -10,7 +10,7 @@ import pandas as pd
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
 
 from app.core.config import settings
-from app.dependencies.auth import get_current_user, get_db
+from app.dependencies.auth import get_current_user, get_db, require_role
 from app.exceptions.custom import ValidationError
 from app.repositories.dataset_repo import DatasetRepository
 from app.schemas.common import APIResponse
@@ -18,6 +18,8 @@ from app.schemas.datasets import DatasetCreateRequest, DatasetResponse, DatasetV
 from app.services.dataset_service import DatasetService
 
 router = APIRouter(tags=["Datasets"])
+
+ADMIN_ROLES = ["Super Admin", "Admin"]
 
 UPLOAD_DIR = Path(settings.ML_ARTIFACTS_PATH).parent / "uploads"
 ALLOWED_EXTENSIONS = {".csv", ".parquet", ".xlsx"}
@@ -36,31 +38,23 @@ async def upload_dataset(
     dataset_type: str = Form("training"),
     tags: str = Form(""),
     service: DatasetService = Depends(get_dataset_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(ADMIN_ROLES)),
 ):
     """Upload a dataset file (CSV, Parquet, or Excel)."""
-    # Validate extension
     ext = Path(file.filename).suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
         raise ValidationError(f"File type '{ext}' not allowed. Supported: {', '.join(ALLOWED_EXTENSIONS)}")
 
-    # Validate file size
     contents = await file.read()
     if len(contents) > MAX_FILE_SIZE:
         raise ValidationError(f"File exceeds maximum size of {MAX_FILE_SIZE // (1024 * 1024)}MB")
 
-    # Compute checksum
     checksum = hashlib.sha256(contents).hexdigest()
-
-    # Ensure upload directory exists
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-
-    # Save file with unique name
     safe_name = f"{uuid.uuid4().hex}{ext}"
     file_path = UPLOAD_DIR / safe_name
     file_path.write_bytes(contents)
 
-    # Parse file to get row/column counts
     try:
         if ext == ".csv":
             df = pd.read_csv(file_path)
@@ -76,7 +70,6 @@ async def upload_dataset(
         row_count = 0
         column_count = 0
 
-    # Parse tags
     tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
 
     payload = DatasetCreateRequest(
@@ -97,7 +90,7 @@ async def upload_dataset(
 async def list_datasets(
     dataset_type: Optional[str] = Query(None),
     service: DatasetService = Depends(get_dataset_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(["Super Admin", "Admin", "Retention Manager", "Business Analyst"])),
 ):
     datasets = await service.list_datasets(dataset_type=dataset_type)
     return APIResponse(success=True, message="Datasets retrieved", data=[DatasetResponse.model_validate(item) for item in datasets])
@@ -107,7 +100,7 @@ async def list_datasets(
 async def dataset_versions(
     id: uuid.UUID,
     service: DatasetService = Depends(get_dataset_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(["Super Admin", "Admin"])),
 ):
     dataset = await service.get_dataset(id)
     return APIResponse(
@@ -123,7 +116,7 @@ async def create_dataset_version(
     file: UploadFile = File(...),
     change_description: str = Form(""),
     service: DatasetService = Depends(get_dataset_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(ADMIN_ROLES)),
 ):
     """Upload a new version of an existing dataset."""
     dataset = await service.get_dataset(id)

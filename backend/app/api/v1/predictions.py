@@ -5,7 +5,7 @@ from typing import List
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Query
 
-from app.dependencies.auth import get_current_user, get_db
+from app.dependencies.auth import get_current_user, get_db, require_role
 from app.repositories.customer_repo import CustomerRepository
 from app.repositories.model_repo import ModelRepository
 from app.repositories.network_repo import NetworkQualityRepository
@@ -19,6 +19,9 @@ from app.services.explanation_service import ExplanationService
 from app.services.prediction_service import PredictionService
 
 router = APIRouter(tags=["Predictions"])
+
+PREDICTION_WRITE_ROLES = ["Super Admin", "Admin", "Retention Manager"]
+PREDICTION_READ_ROLES = ["Super Admin", "Admin", "Retention Manager", "Business Analyst", "Customer Support Executive"]
 
 
 async def get_prediction_service(db=Depends(get_db)) -> PredictionService:
@@ -41,7 +44,7 @@ async def predict(
     payload: PredictRequest,
     background_tasks: BackgroundTasks,
     service: PredictionService = Depends(get_prediction_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(PREDICTION_WRITE_ROLES)),
 ):
     prediction = await service.predict_single(payload.customer_id, background_tasks)
     return APIResponse(success=True, message="Prediction completed", data=PredictionResponse.model_validate(prediction))
@@ -52,7 +55,7 @@ async def predict_bulk(
     payload: BulkPredictRequest,
     background_tasks: BackgroundTasks,
     service: PredictionService = Depends(get_prediction_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(PREDICTION_WRITE_ROLES)),
 ):
     result = await service.predict_bulk(payload.customer_ids, background_tasks)
     return APIResponse(success=True, message="Bulk prediction completed", data=result)
@@ -63,7 +66,7 @@ async def prediction_history(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     service: PredictionService = Depends(get_prediction_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(PREDICTION_READ_ROLES)),
 ):
     predictions = await service.list_predictions(page=page, limit=limit)
     return APIResponse(
@@ -77,7 +80,7 @@ async def prediction_history(
 async def prediction_detail(
     id: uuid.UUID,
     service: PredictionService = Depends(get_prediction_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(PREDICTION_READ_ROLES)),
 ):
     prediction = await service.get_prediction(id)
     return APIResponse(success=True, message="Prediction retrieved", data=PredictionResponse.model_validate(prediction))
@@ -87,7 +90,7 @@ async def prediction_detail(
 async def prediction_explanation(
     id: uuid.UUID,
     service: ExplanationService = Depends(get_explanation_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(PREDICTION_READ_ROLES)),
 ):
     explanation = await service.get_prediction_explanation(id)
     return APIResponse(success=True, message="Prediction explanation retrieved", data=explanation)
@@ -97,7 +100,7 @@ async def prediction_explanation(
 async def prediction_reasons(
     id: uuid.UUID,
     service: ExplanationService = Depends(get_explanation_service),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_role(PREDICTION_READ_ROLES)),
 ):
     explanation = await service.get_prediction_explanation(id)
     return APIResponse(success=True, message="Churn reasons retrieved", data=explanation.reasons)

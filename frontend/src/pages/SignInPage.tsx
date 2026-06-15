@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Cable } from "lucide-react";
 import { api, unwrap } from "../lib/api";
 import { useAuthStore } from "../state/auth";
+import { isAdminRole } from "../components/RoleGuard";
 
 type TokenResponse = {
   access_token: string;
@@ -25,7 +26,7 @@ export function SignInPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (accessToken) return <Navigate to="/dashboard" replace />;
+  if (accessToken) return <Navigate to="/app/dashboard" replace />;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -36,7 +37,12 @@ export function SignInPage() {
       setSession(tokens.access_token, tokens.refresh_token);
       const user = await unwrap<User>(api.get("/auth/me"));
       setUser(user);
-      navigate("/dashboard");
+
+      if (isAdminRole(user.role?.name)) {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/app/dashboard");
+      }
     } catch {
       setError("Sign in failed. Check credentials and backend availability.");
     } finally {
