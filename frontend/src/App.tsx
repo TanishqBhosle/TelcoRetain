@@ -85,6 +85,12 @@ function UnauthorizedPage() {
   );
 }
 
+function RoleRedirect() {
+  const user = useAuthStore((state) => state.user);
+  const dest = isAdminRole(user?.role?.name) ? "/admin/dashboard" : "/app/dashboard";
+  return <Navigate to={dest} replace />;
+}
+
 export default function App() {
   return (
     <Routes>
@@ -134,6 +140,8 @@ export default function App() {
           element={
             <RoleGuard
               allowedRoles={[
+                "Super Admin",
+                "Admin",
                 "Retention Manager",
                 "Marketing Manager",
                 "Business Analyst",
@@ -158,7 +166,7 @@ export default function App() {
         </Route>
 
         {/* Redirect root to appropriate panel */}
-        <Route path="/dashboard" element={<Navigate to="/app/dashboard" replace />} />
+        <Route path="/dashboard" element={<RoleRedirect />} />
       </Route>
     </Routes>
   );

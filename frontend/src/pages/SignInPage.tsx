@@ -25,7 +25,11 @@ export function SignInPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (accessToken) return <Navigate to="/app/dashboard" replace />;
+  const currentUser = useAuthStore((s) => s.user);
+  if (accessToken && currentUser) {
+    const dest = isAdminRole(currentUser.role?.name) ? "/admin/dashboard" : "/app/dashboard";
+    return <Navigate to={dest} replace />;
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
