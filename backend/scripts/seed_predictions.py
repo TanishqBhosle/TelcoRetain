@@ -9,8 +9,8 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from app.core.config import settings
 
-sync_url = settings.DATABASE_URL.replace("+aiosqlite", "")
-engine_sync = create_engine(sync_url, connect_args={"check_same_thread": False})
+sync_url = settings.sync_database_url
+engine_sync = create_engine(sync_url)
 
 from app.models.base import Base
 from app.models import *  # noqa
