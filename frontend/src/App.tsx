@@ -68,6 +68,10 @@ function Protected() {
     return <Navigate to="/signin" replace />;
   }
 
+  if (token && !user) {
+    return null;
+  }
+
   return <Outlet />;
 }
 

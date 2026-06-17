@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Shield shape -->
+  <path d="M12 16 L32 8 L52 16 L52 40 C52 52 32 60 32 60 C32 60 12 52 12 40 Z" fill="#2a8fd4"/>
+  <path d="M12 16 L32 8 L52 16 L52 40 C52 52 32 60 32 60 C32 60 12 52 12 40 Z" fill="url(#fGrad)" opacity="0.3"/>
+  <!-- Bars -->
+  <rect x="20" y="38" width="5" height="14" rx="1" fill="#4db8ff"/>
+  <rect x="27" y="30" width="5" height="22" rx="1" fill="#3aa0e8"/>
+  <rect x="34" y="22" width="5" height="30" rx="1" fill="#2a8fd4"/>
+  <rect x="41" y="16" width="5" height="36" rx="1" fill="#1a7fc4"/>
+  <!-- Signal -->
+  <path d="M44 12 Q48 8 50 4" stroke="#d4a52a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M47 15 Q52 10 55 5" stroke="#d4a52a" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <circle cx="43" cy="13" r="2" fill="#d4a52a"/>
+  <!-- Orbital -->
+  <ellipse cx="32" cy="36" rx="24" ry="10" stroke="#d4a52a" stroke-width="2.5" fill="none" transform="rotate(-18, 32, 36)"/>
+  <defs>
+    <linearGradient id="fGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4db8ff"/>
+      <stop offset="100%" stop-color="#0a3f6e"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Cable, Mail, MapPin, Phone, Send } from "lucide-react";
+import { Mail, MapPin, Phone, Send } from "lucide-react";
 import { FadeIn, SlideUp, StaggerContainer, staggerItem, ScaleIn } from "../components/animations";
 
 export function ContactPage() {
@@ -25,8 +25,7 @@ export function ContactPage() {
       <header className="landing-nav">
         <div className="landing-nav-inner">
           <motion.div className="brand" initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }}>
-            <Cable size={22} />
-            <span>Telco Retain</span>
+            <img src="/logo.svg" alt="TelcoRetain" className="brand-logo" />
           </motion.div>
           <motion.div className="landing-nav-links" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
             <Link to="/">Home</Link>
@@ -133,7 +132,7 @@ export function ContactPage() {
 
       <footer className="landing-footer">
         <div className="landing-footer-inner">
-          <div className="brand"><Cable size={18} /><span>Telco Retain</span></div>
+          <div className="brand"><img src="/logo.svg" alt="TelcoRetain" className="brand-logo" /></div>
           <div className="footer-links">
             <Link to="/about">About</Link>
             <Link to="/pricing">Pricing</Link>

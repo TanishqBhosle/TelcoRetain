@@ -16,11 +16,11 @@ type CustomerDetail = {
   operator: string;
   join_date: string;
   contract_type: string;
-  monthly_charges: number;
-  total_charges: number;
+  monthly_charges: string;
+  total_charges: string;
   tenure_months: number;
-  arpu: number;
-  churn_status: string;
+  arpu: string;
+  status: string;
 };
 
 export function CustomerProfile() {
@@ -125,15 +125,15 @@ export function CustomerProfile() {
             </div>
             <div className="business-info-item">
               <CreditCard size={16} />
-              <span>Monthly: ${customer.monthly_charges.toFixed(2)}</span>
+              <span>Monthly: ₹{Number(customer.monthly_charges).toFixed(2)}</span>
             </div>
             <div className="business-info-item">
               <CreditCard size={16} />
-              <span>Total: ${customer.total_charges.toFixed(2)}</span>
+              <span>Total: ₹{Number(customer.total_charges).toFixed(2)}</span>
             </div>
             <div className="business-info-item">
               <Activity size={16} />
-              <span>ARPU: ${customer.arpu.toFixed(2)}</span>
+              <span>ARPU: ₹{Number(customer.arpu).toFixed(2)}</span>
             </div>
           </div>
         </motion.div>
@@ -146,13 +146,13 @@ export function CustomerProfile() {
         >
           <h3>Churn Status</h3>
           <div className="business-status-display">
-            {customer.churn_status === "Churned" ? (
+            {customer.status === "churned" ? (
               <AlertTriangle size={48} className="text-danger" />
             ) : (
               <CheckCircle size={48} className="text-success" />
             )}
-            <span className={`business-status-large ${customer.churn_status.toLowerCase()}`}>
-              {customer.churn_status}
+            <span className={`business-status-large ${customer.status.toLowerCase()}`}>
+              {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
             </span>
           </div>
         </motion.div>

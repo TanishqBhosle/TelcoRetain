@@ -1,7 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Cable } from "lucide-react";
 import { api, unwrap } from "../lib/api";
 
 export function SignUpPage() {
@@ -40,8 +39,7 @@ export function SignUpPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
         >
-          <Cable size={26} />
-          <span>Telco Retain</span>
+          <img src="/logo.svg" alt="TelcoRetain" className="brand-logo" />
         </motion.div>
         <form onSubmit={submit} className="form">
           <motion.label initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25, duration: 0.3 }}>

@@ -5,11 +5,11 @@ import { api, unwrap } from "../../../lib/api";
 
 type DashboardKPI = {
   total_customers: number;
-  churn_rate: number;
-  revenue_at_risk: number;
-  high_risk_customers: number;
-  active_campaigns: number;
-  arpu: number;
+  active_customers: number;
+  average_churn_probability: number;
+  revenue_at_risk: string;
+  active_campaigns_count: number;
+  campaign_conversion_rate: number;
 };
 
 export function BusinessDashboard() {
@@ -23,6 +23,9 @@ export function BusinessDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
+  const churnPct = kpis ? (kpis.average_churn_probability * 100).toFixed(1) : "0";
+  const highRisk = kpis ? Math.round(kpis.total_customers * kpis.average_churn_probability) : 0;
+
   const kpiCards = [
     {
       label: "Total Customers",
@@ -32,39 +35,39 @@ export function BusinessDashboard() {
       trend: "+2.5%",
     },
     {
-      label: "Churn Rate",
-      value: `${kpis?.churn_rate?.toFixed(1) ?? 0}%`,
+      label: "Active Customers",
+      value: kpis?.active_customers?.toLocaleString() ?? "0",
+      icon: Activity,
+      color: "#10b981",
+      trend: "+4.1%",
+    },
+    {
+      label: "Churn Probability",
+      value: `${churnPct}%`,
       icon: TrendingDown,
       color: "#ef4444",
       trend: "-1.2%",
     },
     {
       label: "Revenue at Risk",
-      value: `$${(kpis?.revenue_at_risk ?? 0).toLocaleString()}`,
+      value: `₹${Number(kpis?.revenue_at_risk ?? 0).toLocaleString()}`,
       icon: DollarSign,
       color: "#f59e0b",
-      trend: "+5.3%",
+      trend: "-5.3%",
     },
     {
       label: "High Risk Customers",
-      value: kpis?.high_risk_customers?.toLocaleString() ?? "0",
+      value: highRisk.toLocaleString(),
       icon: AlertTriangle,
       color: "#f97316",
       trend: "-3.1%",
     },
     {
       label: "Active Campaigns",
-      value: kpis?.active_campaigns?.toString() ?? "0",
+      value: kpis?.active_campaigns_count?.toString() ?? "0",
       icon: Target,
-      color: "#10b981",
-      trend: "+2",
-    },
-    {
-      label: "ARPU",
-      value: `$${kpis?.arpu?.toFixed(2) ?? "0"}`,
-      icon: BarChart3,
       color: "#8b5cf6",
-      trend: "+$2.50",
+      trend: "+2",
     },
   ];
 

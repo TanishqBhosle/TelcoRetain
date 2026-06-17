@@ -1,7 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Cable } from "lucide-react";
 import { api, unwrap } from "../lib/api";
 
 export function PasswordResetRequestPage() {
@@ -34,8 +33,7 @@ export function PasswordResetRequestPage() {
         transition={{ duration: 0.5 }}
       >
         <motion.div className="brand auth-brand" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <Cable size={26} />
-          <span>Telco Retain</span>
+          <img src="/logo.svg" alt="TelcoRetain" className="brand-logo" />
         </motion.div>
         <motion.h2 style={{ margin: "0 0 18px", fontSize: 18 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>Reset Password</motion.h2>
         <motion.p style={{ color: "#64746f", fontSize: 13, marginTop: 0, marginBottom: 14 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>

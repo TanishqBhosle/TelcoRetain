@@ -3,11 +3,11 @@ Email Service using SendGrid.
 Handles email verification, password reset, and notification emails.
 """
 
+import logging
 from typing import Optional
 from app.core.config import settings
-import structlog
 
-logger = structlog.get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class EmailService:
@@ -26,7 +26,7 @@ class EmailService:
                 from sendgrid import SendGridAPIClient
                 self._client = SendGridAPIClient(api_key=self.api_key)
             except Exception as e:
-                logger.warning("sendgrid_client_init_failed", error=str(e))
+                logger.warning("sendgrid_client_init_failed: %s", e)
                 self._enabled = False
         return self._client
 
@@ -43,7 +43,7 @@ class EmailService:
     ) -> bool:
         """Send an email via SendGrid."""
         if not self._enabled:
-            logger.info("email_service_disabled", to=to_email, subject=subject)
+            logger.info("email_service_disabled to=%s subject=%s", to_email, subject)
             return False
 
         client = self._get_client()
@@ -63,10 +63,10 @@ class EmailService:
                 mail.content = [Content("text/plain", text_content), Content("text/html", html_content)]
 
             response = await client.send(mail)
-            logger.info("email_sent", to=to_email, status=response.status_code)
+            logger.info("email_sent to=%s status=%s", to_email, response.status_code)
             return response.status_code in (200, 202)
         except Exception as e:
-            logger.error("email_send_failed", to=to_email, error=str(e))
+            logger.error("email_send_failed to=%s: %s", to_email, e)
             return False
 
     async def send_verification_email(self, email: str, token: str, frontend_url: str = "http://localhost:5173") -> bool:

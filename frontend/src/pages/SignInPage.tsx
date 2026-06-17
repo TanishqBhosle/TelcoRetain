@@ -1,7 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Cable } from "lucide-react";
 import { api, unwrap } from "../lib/api";
 import { useAuthStore } from "../state/auth";
 import { isAdminRole } from "../components/RoleGuard";
@@ -64,8 +63,7 @@ export function SignInPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
         >
-          <Cable size={26} />
-          <span>Telco Retain</span>
+          <img src="/logo.svg" alt="TelcoRetain" className="brand-logo" />
         </motion.div>
         <form onSubmit={submit} className="form">
           <motion.label

@@ -5,7 +5,6 @@ import {
   ArrowRight,
   BarChart3,
   BrainCircuit,
-  Cable,
   ChevronDown,
   Check,
   Target,
@@ -64,9 +63,6 @@ const navLinks: NavLink[] = [
   { label: "Solutions", href: "#solutions" },
   { label: "Features", href: "#features" },
   { label: "Analytics", href: "#analytics" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
 ];
 
 const trustBadges = [
@@ -164,11 +160,9 @@ const footerColumns: FooterColumn[] = [
   {
     title: "Company",
     links: [
-      { label: "About Us", href: "/about" },
       { label: "Careers", href: "#" },
       { label: "Partners", href: "#" },
       { label: "Press Kit", href: "#" },
-      { label: "Contact", href: "/contact" },
     ],
   },
   {
@@ -378,8 +372,7 @@ function Navbar() {
     >
       <div className="navbar-inner">
         <Link to="/" className="navbar-logo">
-          <Cable size={22} />
-          <span>TELCORETAIN</span>
+          <img src="/logo.svg" alt="TelcoRetain" style={{ height: 36, width: "auto" }} />
         </Link>
 
         <div className={`navbar-links ${mobileOpen ? "navbar-mobile-open" : ""}`}>
@@ -1136,8 +1129,7 @@ function FooterSection() {
         <div className="footer-grid">
           <div className="footer-brand">
             <div className="navbar-logo" style={{ marginBottom: 16 }}>
-              <Cable size={22} />
-              <span>TELCORETAIN</span>
+              <img src="/logo-light.svg" alt="TelcoRetain" style={{ height: 36, width: "auto" }} />
             </div>
             <p className="footer-tagline">
               AI-powered telecom customer retention intelligence platform.

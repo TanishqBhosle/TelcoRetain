@@ -45,9 +45,9 @@ export function AdminDashboard() {
     { label: "Redis Cache", value: health?.redis_connected ? "Connected" : "Disconnected", icon: Server, color: health?.redis_connected ? "#10b981" : "#ef4444" },
     { label: "ML Models", value: health?.ml_models_loaded ? "Loaded" : "Not Loaded", icon: BrainCircuit, color: health?.ml_models_loaded ? "#10b981" : "#f59e0b" },
     { label: "Uptime", value: `${Math.floor((health?.uptime_seconds ?? 0) / 3600)}h ${Math.floor(((health?.uptime_seconds ?? 0) % 3600) / 60)}m`, icon: Cpu, color: "#6366f1" },
-    { label: "CPU Usage", value: `${health?.system_metrics?.cpu_percent ?? 0}%`, icon: Cpu, color: "#8b5cf6" },
-    { label: "Memory Usage", value: `${health?.system_metrics?.memory_percent ?? 0}%`, icon: HardDrive, color: "#ec4899" },
-    { label: "Disk Usage", value: `${health?.system_metrics?.disk_percent ?? 0}%`, icon: HardDrive, color: "#f97316" },
+    { label: "CPU Usage", value: `${health?.system_metrics?.cpu_utilization_percent ?? "N/A"}`, icon: Cpu, color: "#8b5cf6" },
+    { label: "Memory Usage", value: `${health?.system_metrics?.memory_utilization_percent ?? "N/A"}`, icon: HardDrive, color: "#ec4899" },
+    { label: "Disk Usage", value: `${health?.system_metrics?.disk_percent ?? "N/A"}`, icon: HardDrive, color: "#f97316" },
   ];
 
   return (

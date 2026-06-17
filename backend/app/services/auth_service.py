@@ -54,8 +54,11 @@ class AuthService:
 
         created_user = await self.user_repo.create(user)
 
-        # Send verification email (non-blocking)
-        await email_service.send_verification_email(req.email, verify_tok)
+        # Send verification email (best-effort, must not block registration)
+        try:
+            await email_service.send_verification_email(req.email, verify_tok)
+        except Exception:
+            pass  # Email failure should not prevent user registration
 
         return created_user
 

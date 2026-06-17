@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Cable, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { api, unwrap } from "../lib/api";
 
 export function PasswordResetConfirmPage() {
@@ -44,8 +44,7 @@ export function PasswordResetConfirmPage() {
         transition={{ duration: 0.5 }}
       >
         <motion.div className="brand auth-brand" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <Cable size={26} />
-          <span>Telco Retain</span>
+          <img src="/logo.svg" alt="TelcoRetain" className="brand-logo" />
         </motion.div>
         {success ? (
           <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 200 }}>

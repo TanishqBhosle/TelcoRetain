@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Cable, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 export function PostLogoutPage() {
   return (
@@ -19,8 +19,7 @@ export function PostLogoutPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Cable size={26} />
-          <span>Telco Retain</span>
+          <img src="/logo.svg" alt="TelcoRetain" className="brand-logo" />
         </motion.div>
         <motion.div
           style={{ margin: "24px 0" }}

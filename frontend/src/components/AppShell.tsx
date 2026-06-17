@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart3,
   BrainCircuit,
-  Cable,
   FileBarChart,
   LogOut,
   Megaphone,
@@ -39,8 +38,7 @@ export function AppShell() {
         transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
       >
         <div className="brand">
-          <Cable size={24} />
-          <span>Telco Retain</span>
+          <img src="/logo-light.svg" alt="TelcoRetain" className="brand-logo" />
         </div>
         <nav className="nav">
           {nav.map((item, i) => (

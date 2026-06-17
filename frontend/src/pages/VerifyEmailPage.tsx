@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Cable, CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 import { api, unwrap } from "../lib/api";
 
 export function VerifyEmailPage() {
@@ -37,8 +37,7 @@ export function VerifyEmailPage() {
         transition={{ duration: 0.5 }}
       >
         <motion.div className="brand auth-brand" style={{ justifyContent: "center" }} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <Cable size={26} />
-          <span>Telco Retain</span>
+          <img src="/logo.svg" alt="TelcoRetain" className="brand-logo" />
         </motion.div>
         {status === "loading" && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}>Verifying your email...</motion.p>}
         {status === "success" && (

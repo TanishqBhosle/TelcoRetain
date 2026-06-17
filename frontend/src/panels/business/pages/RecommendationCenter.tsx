@@ -20,10 +20,8 @@ export function RecommendationCenter() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    unwrap<Recommendation[]>(api.get("/recommendations/history"))
-      .then(setRecommendations)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    // Recommendations are generated on-demand, no history endpoint needed
+    setLoading(false);
   }, []);
 
   return (

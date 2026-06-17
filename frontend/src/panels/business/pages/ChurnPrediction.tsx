@@ -1,25 +1,51 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { BrainCircuit, Play, AlertTriangle, CheckCircle, TrendingUp, TrendingDown } from "lucide-react";
+import { BrainCircuit, AlertTriangle, CheckCircle, TrendingUp, Search, Users } from "lucide-react";
 import { api, unwrap } from "../../../lib/api";
 
+type Customer = {
+  id: string;
+  customer_id: string;
+  full_name: string;
+  operator: string;
+  region: string;
+};
+
 type PredictionResult = {
+  id: string;
   customer_id: string;
   churn_probability: number;
   risk_score: number;
   risk_category: string;
   confidence_score: number;
+  features_used: Record<string, any>;
 };
 
 export function ChurnPrediction() {
-  const [customerId, setCustomerId] = useState("");
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<string>("");
+  const [search, setSearch] = useState("");
   const [result, setResult] = useState<PredictionResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingCustomers, setLoadingCustomers] = useState(true);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    unwrap<{ items: Customer[] }>(api.get("/customers?limit=50"))
+      .then((data) => setCustomers(data.items || []))
+      .catch(() => {})
+      .finally(() => setLoadingCustomers(false));
+  }, []);
+
+  const filteredCustomers = customers.filter(
+    (c) =>
+      c.full_name.toLowerCase().includes(search.toLowerCase()) ||
+      c.customer_id.toLowerCase().includes(search.toLowerCase())
+  );
+
   const handlePredict = async () => {
-    if (!customerId.trim()) {
-      setError("Please enter a customer ID");
+    if (!selectedCustomer) {
+      setError("Please select a customer");
       return;
     }
     setLoading(true);
@@ -27,15 +53,18 @@ export function ChurnPrediction() {
     setResult(null);
     try {
       const response = await unwrap<PredictionResult>(
-        api.post("/predictions/predict", { customer_id: customerId })
+        api.post("/predictions/predict", { customer_id: selectedCustomer })
       );
       setResult(response);
     } catch (err: any) {
-      setError(err.message || "Prediction failed");
+      const msg = err?.response?.data?.message || err.message || "Prediction failed";
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
+
+  const selectedName = customers.find((c) => c.id === selectedCustomer)?.full_name;
 
   return (
     <div className="business-page">
@@ -45,7 +74,7 @@ export function ChurnPrediction() {
         transition={{ duration: 0.5 }}
       >
         <h2 className="business-page-title">Churn Prediction</h2>
-        <p className="business-page-subtitle">Predict customer churn risk using ML models</p>
+        <p className="business-page-subtitle">Predict customer churn risk using ensemble ML models</p>
       </motion.div>
 
       <motion.div
@@ -54,17 +83,45 @@ export function ChurnPrediction() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.4 }}
       >
-        <h3>Run Prediction</h3>
-        <div className="business-form-row">
+        <h3><Users size={20} /> Select Customer</h3>
+        <div className="business-search-bar" style={{ marginBottom: 12 }}>
+          <Search size={18} />
           <input
             type="text"
-            placeholder="Enter Customer ID"
-            value={customerId}
-            onChange={(e) => setCustomerId(e.target.value)}
+            placeholder="Search customers by name or ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
-          <button className="business-btn primary" onClick={handlePredict} disabled={loading}>
+        </div>
+        <div className="business-customer-select">
+          {loadingCustomers ? (
+            <div className="business-loading">Loading customers...</div>
+          ) : (
+            <div className="business-customer-list">
+              {filteredCustomers.slice(0, 10).map((customer) => (
+                <div
+                  key={customer.id}
+                  className={`business-customer-option ${selectedCustomer === customer.id ? "selected" : ""}`}
+                  onClick={() => setSelectedCustomer(customer.id)}
+                >
+                  <div className="business-avatar">{customer.full_name.charAt(0)}</div>
+                  <div>
+                    <span className="business-customer-name">{customer.full_name}</span>
+                    <span className="business-customer-id">{customer.customer_id} · {customer.operator} · {customer.region}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="business-form-row" style={{ marginTop: 16 }}>
+          <span style={{ fontSize: 14, color: "#64748b" }}>
+            {selectedName ? `Selected: ${selectedName}` : "No customer selected"}
+          </span>
+          <button className="business-btn primary" onClick={handlePredict} disabled={loading || !selectedCustomer}>
             <BrainCircuit size={16} />
-            {loading ? "Predicting..." : "Predict"}
+            {loading ? "Predicting..." : "Run Prediction"}
           </button>
         </div>
         {error && <div className="business-error">{error}</div>}
@@ -103,7 +160,10 @@ export function ChurnPrediction() {
               <div className="business-progress-bar">
                 <div
                   className="business-progress-fill"
-                  style={{ width: `${result.churn_probability * 100}%` }}
+                  style={{
+                    width: `${result.churn_probability * 100}%`,
+                    background: result.risk_category === "HIGH" ? "#ef4444" : result.risk_category === "MEDIUM" ? "#f59e0b" : "#10b981",
+                  }}
                 />
               </div>
             </div>
@@ -111,7 +171,7 @@ export function ChurnPrediction() {
             <div className="business-result-card">
               <div className="business-result-label">Risk Score</div>
               <div className="business-result-value">
-                {result.risk_score.toFixed(2)}
+                {result.risk_score} / 100
               </div>
             </div>
 
@@ -124,8 +184,8 @@ export function ChurnPrediction() {
           </div>
 
           <div className="business-result-actions">
-            <button className="business-btn secondary">View Explanation</button>
-            <button className="business-btn primary">Generate Recommendations</button>
+            <a href="/app/explain" className="business-btn secondary">View SHAP Explanation</a>
+            <a href="/app/recommendations" className="business-btn primary">Generate Retention Offers</a>
           </div>
         </motion.div>
       )}

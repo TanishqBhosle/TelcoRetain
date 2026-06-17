@@ -13,8 +13,8 @@ type Customer = {
   operator: string;
   region: string;
   tenure_months: number;
-  monthly_charges: number;
-  churn_status: string;
+  monthly_charges: string;
+  status: string;
 };
 
 export function CustomerExplorer() {
@@ -126,10 +126,10 @@ export function CustomerExplorer() {
                   <td>{customer.operator}</td>
                   <td>{customer.region}</td>
                   <td>{customer.tenure_months} months</td>
-                  <td>${customer.monthly_charges.toFixed(2)}</td>
+                  <td>₹{Number(customer.monthly_charges).toFixed(2)}</td>
                   <td>
-                    <span className={`business-status ${customer.churn_status.toLowerCase()}`}>
-                      {customer.churn_status}
+                    <span className={`business-status ${customer.status.toLowerCase()}`}>
+                      {customer.status}
                     </span>
                   </td>
                   <td>

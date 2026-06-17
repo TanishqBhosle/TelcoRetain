@@ -49,6 +49,12 @@ textarea:focus-visible {
   letter-spacing: 0;
 }
 
+.brand-logo {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
 .nav {
   display: grid;
   gap: 4px;
@@ -2403,6 +2409,41 @@ code {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.business-customer-select {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.business-customer-list {
+  display: grid;
+  gap: 0;
+}
+
+.business-customer-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.business-customer-option:hover {
+  background: #f8fafc;
+}
+
+.business-customer-option.selected {
+  background: #eff6ff;
+  border-left: 3px solid #6366f1;
+}
+
+.business-customer-option:last-child {
+  border-bottom: none;
 }
 
 .business-avatar {
