@@ -5,7 +5,7 @@ Formats errors to match the standard API response wrapper:
 """
 
 import datetime
-import logging
+import structlog
 from typing import Any
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -14,7 +14,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.exceptions.custom import PlatformException
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 def format_error_response(request: Request, status_code: int, message: str, data: Any = None) -> JSONResponse:
@@ -25,7 +25,7 @@ def format_error_response(request: Request, status_code: int, message: str, data
             "success": False,
             "message": message,
             "data": data,
-            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "path": request.url.path,
         },
     )

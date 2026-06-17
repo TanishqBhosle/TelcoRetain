@@ -80,14 +80,14 @@ class AuthService:
             user.failed_login_count += 1
             if user.failed_login_count >= 5:
                 # Lock account for 15 minutes
-                user.locked_until = datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
+                user.locked_until = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None) + datetime.timedelta(minutes=15)
             await self.user_repo.update(user)
             raise AuthenticationError("Invalid email or password")
 
         # Successful login: reset failed counters
         user.failed_login_count = 0
         user.locked_until = None
-        user.last_login = datetime.datetime.utcnow()
+        user.last_login = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
         await self.user_repo.update(user)
 
         # Generate tokens

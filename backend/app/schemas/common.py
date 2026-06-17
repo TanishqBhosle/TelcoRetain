@@ -2,7 +2,7 @@
 Common API schemas.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Generic, Optional, TypeVar
 from pydantic import BaseModel, Field
 
@@ -16,7 +16,7 @@ class APIResponse(BaseModel, Generic[T]):
     message: str = Field(..., description="Readable status or feedback message")
     data: Optional[T] = Field(None, description="The response payload")
     timestamp: str = Field(
-        default_factory=lambda: datetime.utcnow().isoformat() + "Z",
+        default_factory=lambda: datetime.now(timezone.utc).isoformat(),
         description="ISO 8601 UTC timestamp of response generation",
     )
     path: Optional[str] = Field(None, description="The endpoint path accessed")

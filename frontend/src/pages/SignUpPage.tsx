@@ -8,6 +8,7 @@ export function SignUpPage() {
   const [full_name, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [gender, setGender] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +17,7 @@ export function SignUpPage() {
     setLoading(true);
     setError("");
     try {
-      await api.post("/auth/register", { full_name, email, password });
+      await api.post("/auth/register", { full_name, email, password, gender: gender || undefined, role_name: "Business Analyst" });
       navigate("/signin");
     } catch {
       setError("Registration failed. Email may already be in use.");
@@ -53,6 +54,15 @@ export function SignUpPage() {
           <motion.label initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35, duration: 0.3 }}>
             Password
             <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required autoComplete="new-password" />
+          </motion.label>
+          <motion.label initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4, duration: 0.3 }}>
+            Gender (optional)
+            <select value={gender} onChange={(e) => setGender(e.target.value)}>
+              <option value="">Prefer not to say</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
           </motion.label>
           {error ? (
             <motion.p className="error-text" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}>{error}</motion.p>
