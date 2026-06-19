@@ -1,4 +1,3 @@
-import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard,
@@ -13,41 +12,82 @@ import {
   Cable,
 } from "lucide-react";
 import { useAuthStore } from "../../state/auth";
+import { SidebarGroup } from "../../components/SidebarGroup";
 
-const businessNav = [
-  { to: "/app/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/app/customers", icon: Users, label: "Customer Explorer" },
-  { to: "/app/predict", icon: BrainCircuit, label: "Churn Prediction" },
-  { to: "/app/explain", icon: Lightbulb, label: "Explainable AI" },
-  { to: "/app/recommendations", icon: Sparkles, label: "Recommendation Center" },
-  { to: "/app/campaigns", icon: Megaphone, label: "Campaign Management" },
-  { to: "/app/analytics", icon: BarChart3, label: "Analytics Dashboard" },
-  { to: "/app/reports", icon: FileBarChart, label: "Reports" },
-  { to: "/app/settings", icon: Settings, label: "Profile Settings" },
+interface NavItem {
+  to: string;
+  icon: typeof LayoutDashboard;
+  label: string;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const businessNavGroups: NavGroup[] = [
+  {
+    label: "Analytics",
+    items: [
+      { to: "/app/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+      { to: "/app/analytics", icon: BarChart3, label: "Analytics Dashboard" },
+      { to: "/app/reports", icon: FileBarChart, label: "Reports" },
+    ],
+  },
+  {
+    label: "Customers",
+    items: [
+      { to: "/app/customers", icon: Users, label: "Customer Explorer" },
+      { to: "/app/predict", icon: BrainCircuit, label: "Churn Prediction" },
+      { to: "/app/explain", icon: Lightbulb, label: "Explainable AI" },
+    ],
+  },
+  {
+    label: "Management",
+    items: [
+      { to: "/app/recommendations", icon: Sparkles, label: "Recommendation Center" },
+      { to: "/app/campaigns", icon: Megaphone, label: "Campaign Management" },
+    ],
+  },
+  {
+    label: "Settings",
+    items: [
+      { to: "/app/settings", icon: Settings, label: "Profile Settings" },
+    ],
+  },
 ];
 
 export function BusinessSidebar() {
-  const location = useLocation();
   const { user } = useAuthStore();
 
-  const filteredNav = businessNav.filter((item) => {
-    const role = user?.role?.name;
-    if (!role) return false;
+  const role = user?.role?.name;
+
+  const allowedRoutes = (() => {
+    if (!role) return [];
 
     if (role === "Customer Support Executive") {
-      return ["/app/dashboard", "/app/customers", "/app/predict", "/app/recommendations", "/app/settings"].includes(item.to);
+      return ["/app/dashboard", "/app/customers", "/app/predict", "/app/recommendations", "/app/settings"];
     }
     if (role === "Executive Viewer") {
-      return ["/app/dashboard", "/app/reports", "/app/analytics", "/app/settings"].includes(item.to);
+      return ["/app/dashboard", "/app/reports", "/app/analytics", "/app/settings"];
     }
     if (role === "Business Analyst") {
-      return ["/app/dashboard", "/app/customers", "/app/analytics", "/app/reports", "/app/settings"].includes(item.to);
+      return ["/app/dashboard", "/app/customers", "/app/analytics", "/app/reports", "/app/settings"];
     }
     if (role === "Marketing Manager") {
-      return ["/app/dashboard", "/app/campaigns", "/app/recommendations", "/app/analytics", "/app/settings"].includes(item.to);
+      return ["/app/dashboard", "/app/campaigns", "/app/recommendations", "/app/analytics", "/app/settings"];
     }
-    return true;
-  });
+    return null; // null means all routes allowed
+  })();
+
+  const filteredGroups = businessNavGroups
+    .map((group) => ({
+      ...group,
+      items: allowedRoutes === null
+        ? group.items
+        : group.items.filter((item) => allowedRoutes.includes(item.to)),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <motion.aside
@@ -62,23 +102,13 @@ export function BusinessSidebar() {
         <span className="business-badge">{user?.role?.name ?? "Business"}</span>
       </div>
       <nav className="business-nav">
-        {filteredNav.map((item, i) => (
-          <motion.div
-            key={item.to}
-            initial={{ opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 + i * 0.04, duration: 0.3 }}
-          >
-            <NavLink
-              to={item.to}
-              className={({ isActive }) =>
-                `business-nav-item ${isActive ? "active" : ""}`
-              }
-            >
-              <item.icon size={18} />
-              <span>{item.label}</span>
-            </NavLink>
-          </motion.div>
+        {filteredGroups.map((group) => (
+          <SidebarGroup
+            key={group.label}
+            label={group.label}
+            items={group.items}
+            itemClassName="business-nav-item"
+          />
         ))}
       </nav>
     </motion.aside>

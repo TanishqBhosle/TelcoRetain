@@ -46,12 +46,12 @@ export function PasswordResetRequestPage() {
           </motion.label>
           {error && <motion.p className="error-text" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{error}</motion.p>}
           {success && <motion.p style={{ color: "#146b45", fontSize: 13, margin: 0 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{success}</motion.p>}
-          <motion.button className="primary-button" disabled={loading} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+          <motion.button className="btn btn-primary" style={{ width: '100%' }} disabled={loading} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
             {loading ? "Sending..." : "Send reset link"}
           </motion.button>
         </form>
-        <motion.p style={{ textAlign: "center", marginTop: 16, fontSize: 13, color: "#64746f" }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-          <Link to="/signin" style={{ color: "#1d8a8a", fontWeight: 700 }}>Back to Sign in</Link>
+        <motion.p className="auth-footer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+          <Link to="/signin">Back to Sign in</Link>
         </motion.p>
       </motion.section>
     </main>

@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, TrendingDown, DollarSign, AlertTriangle, Target, BarChart3, Activity } from "lucide-react";
+import { Users, TrendingDown, TrendingUp, DollarSign, AlertTriangle, Target, BarChart3, Activity } from "lucide-react";
 import { api, unwrap } from "../../../lib/api";
+import { SkeletonLoader } from "../../../components/SkeletonLoader";
+import { ErrorState } from "../../../components/ErrorState";
 
 type DashboardKPI = {
   total_customers: number;
@@ -12,16 +14,31 @@ type DashboardKPI = {
   campaign_conversion_rate: number;
 };
 
+function getTrendClass(trend: string): "positive" | "negative" | "neutral" {
+  if (trend.startsWith("+") && trend !== "+0" && trend !== "+0%") return "positive";
+  if (trend.startsWith("-") && trend !== "-0" && trend !== "-0%") return "negative";
+  return "neutral";
+}
+
 export function BusinessDashboard() {
   const [kpis, setKpis] = useState<DashboardKPI | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchKpis = useCallback(() => {
+    setLoading(true);
+    setError(null);
     unwrap<DashboardKPI>(api.get("/dashboard/kpis"))
       .then(setKpis)
-      .catch(() => {})
+      .catch((err) => {
+        setError(err?.message || "Failed to load dashboard data");
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchKpis();
+  }, [fetchKpis]);
 
   const churnPct = kpis ? (kpis.average_churn_probability * 100).toFixed(1) : "0";
   const highRisk = kpis ? Math.round(kpis.total_customers * kpis.average_churn_probability) : 0;
@@ -71,6 +88,18 @@ export function BusinessDashboard() {
     },
   ];
 
+  if (error) {
+    return (
+      <div className="business-page">
+        <ErrorState
+          heading="Failed to load dashboard"
+          description={error}
+          onRetry={fetchKpis}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="business-page">
       <motion.div
@@ -82,28 +111,34 @@ export function BusinessDashboard() {
         <p className="business-page-subtitle">Overview of key business metrics and retention insights</p>
       </motion.div>
 
-      <div className="business-kpi-grid">
-        {kpiCards.map((kpi, i) => (
-          <motion.div
-            key={kpi.label}
-            className="business-kpi-card"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + i * 0.05, duration: 0.4 }}
-          >
-            <div className="business-kpi-icon" style={{ backgroundColor: `${kpi.color}20`, color: kpi.color }}>
-              <kpi.icon size={24} />
-            </div>
-            <div className="business-kpi-content">
-              <span className="business-kpi-label">{kpi.label}</span>
-              <span className="business-kpi-value">{loading ? "..." : kpi.value}</span>
-              <span className={`business-kpi-trend ${kpi.trend.startsWith("+") ? "positive" : "negative"}`}>
-                {kpi.trend}
-              </span>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      {loading ? (
+        <SkeletonLoader variant="card" count={6} />
+      ) : (
+        <div className="business-kpi-grid">
+          {kpiCards.map((kpi, i) => (
+            <motion.div
+              key={kpi.label}
+              className="business-kpi-card"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + i * 0.05, duration: 0.4 }}
+            >
+              <div className="business-kpi-icon" style={{ backgroundColor: `${kpi.color}20`, color: kpi.color }}>
+                <kpi.icon size={24} />
+              </div>
+              <div className="business-kpi-content">
+                <span className="business-kpi-label">{kpi.label}</span>
+                <span className="business-kpi-value">{kpi.value}</span>
+                <span className={`business-kpi-trend ${getTrendClass(kpi.trend)}`}>
+                  {getTrendClass(kpi.trend) === "positive" && <TrendingUp size={14} />}
+                  {getTrendClass(kpi.trend) === "negative" && <TrendingDown size={14} />}
+                  {kpi.trend}
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       <div className="business-section">
         <h3 className="business-section-title">Quick Actions</h3>

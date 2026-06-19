@@ -1,4 +1,3 @@
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard,
@@ -14,28 +13,50 @@ import {
   Lock,
   Bell,
   Cable,
-  LogOut,
 } from "lucide-react";
-import { useAuthStore } from "../../state/auth";
+import { SidebarGroup } from "../../components/SidebarGroup";
 
-const adminNav = [
-  { to: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/admin/users", icon: Users, label: "User Management" },
-  { to: "/admin/roles", icon: Shield, label: "Roles & Permissions" },
-  { to: "/admin/datasets", icon: Database, label: "Dataset Management" },
-  { to: "/admin/models", icon: BrainCircuit, label: "Model Registry" },
-  { to: "/admin/model-monitoring", icon: Activity, label: "Model Monitoring" },
-  { to: "/admin/settings", icon: Settings, label: "System Settings" },
-  { to: "/admin/audit-logs", icon: FileText, label: "Audit Logs" },
-  { to: "/admin/api-monitoring", icon: Wifi, label: "API Monitoring" },
-  { to: "/admin/database", icon: Server, label: "Database Health" },
-  { to: "/admin/security", icon: Lock, label: "Security Center" },
-  { to: "/admin/notifications", icon: Bell, label: "Notification Settings" },
+const adminNavGroups = [
+  {
+    label: "Overview",
+    items: [
+      { to: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    ],
+  },
+  {
+    label: "Users & Access",
+    items: [
+      { to: "/admin/users", icon: Users, label: "User Management" },
+      { to: "/admin/roles", icon: Shield, label: "Roles & Permissions" },
+    ],
+  },
+  {
+    label: "ML Platform",
+    items: [
+      { to: "/admin/datasets", icon: Database, label: "Dataset Management" },
+      { to: "/admin/models", icon: BrainCircuit, label: "Model Registry" },
+      { to: "/admin/model-monitoring", icon: Activity, label: "Model Monitoring" },
+    ],
+  },
+  {
+    label: "Infrastructure",
+    items: [
+      { to: "/admin/settings", icon: Settings, label: "System Settings" },
+      { to: "/admin/api-monitoring", icon: Wifi, label: "API Monitoring" },
+      { to: "/admin/database", icon: Server, label: "Database Health" },
+      { to: "/admin/security", icon: Lock, label: "Security Center" },
+    ],
+  },
+  {
+    label: "Audit",
+    items: [
+      { to: "/admin/audit-logs", icon: FileText, label: "Audit Logs" },
+      { to: "/admin/notifications", icon: Bell, label: "Notification Settings" },
+    ],
+  },
 ];
 
 export function AdminSidebar() {
-  const location = useLocation();
-
   return (
     <motion.aside
       className="admin-sidebar"
@@ -49,23 +70,12 @@ export function AdminSidebar() {
         <span className="admin-badge">Admin</span>
       </div>
       <nav className="admin-nav">
-        {adminNav.map((item, i) => (
-          <motion.div
-            key={item.to}
-            initial={{ opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 + i * 0.04, duration: 0.3 }}
-          >
-            <NavLink
-              to={item.to}
-              className={({ isActive }) =>
-                `admin-nav-item ${isActive ? "active" : ""}`
-              }
-            >
-              <item.icon size={18} />
-              <span>{item.label}</span>
-            </NavLink>
-          </motion.div>
+        {adminNavGroups.map((group) => (
+          <SidebarGroup
+            key={group.label}
+            label={group.label}
+            items={group.items}
+          />
         ))}
       </nav>
     </motion.aside>

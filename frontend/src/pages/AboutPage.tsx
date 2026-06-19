@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowRight, Target, Users, Zap } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Target, Users, Zap, Menu, X } from "lucide-react";
 import { FadeIn, SlideUp, StaggerContainer, staggerItem } from "../components/animations";
 
 const team = [
@@ -11,6 +12,8 @@ const team = [
 ];
 
 export function AboutPage() {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
     <div className="landing">
       <header className="landing-nav">
@@ -23,10 +26,47 @@ export function AboutPage() {
             <Link to="/about" className="nav-active">About</Link>
             <Link to="/pricing">Pricing</Link>
             <Link to="/contact">Contact</Link>
-            <Link to="/signin" className="primary-button" style={{ minHeight: 36, padding: "0 16px", fontSize: 13 }}>Sign in</Link>
+            <Link to="/signin" className="btn btn-primary btn-sm" style={{ fontSize: 13 }}>Sign in</Link>
           </motion.div>
+          <button
+            className="mobile-nav-toggle landing-mobile-toggle"
+            onClick={() => setMobileNavOpen(!mobileNavOpen)}
+            aria-label={mobileNavOpen ? "Close navigation" : "Open navigation"}
+          >
+            {mobileNavOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </header>
+
+      <AnimatePresence>
+        {mobileNavOpen && (
+          <>
+            <motion.div
+              className="mobile-nav-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileNavOpen(false)}
+            />
+            <motion.aside
+              className="mobile-nav-drawer"
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              <div className="mobile-sidebar-brand">TelcoRetain</div>
+              <nav className="mobile-drawer-links">
+                <Link to="/" onClick={() => setMobileNavOpen(false)}>Home</Link>
+                <Link to="/about" onClick={() => setMobileNavOpen(false)}>About</Link>
+                <Link to="/pricing" onClick={() => setMobileNavOpen(false)}>Pricing</Link>
+                <Link to="/contact" onClick={() => setMobileNavOpen(false)}>Contact</Link>
+                <Link to="/signin" className="btn btn-primary btn-sm" onClick={() => setMobileNavOpen(false)}>Sign in</Link>
+              </nav>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
       <section className="about-hero">
         <motion.div
@@ -71,8 +111,19 @@ export function AboutPage() {
                 { icon: Zap, title: "Speed", desc: "Real-time predictions in under 200ms per customer." },
                 { icon: Users, title: "Actionability", desc: "From insight to offer generation in a single workflow." },
               ].map((v) => (
-                <motion.div key={v.title} className="value-card" variants={staggerItem} whileHover={{ y: -4, boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}>
-                  <v.icon size={28} />
+                <motion.div
+                  key={v.title}
+                  className="value-card"
+                  variants={staggerItem}
+                  whileHover={{ y: -4, boxShadow: "var(--shadow-md)" }}
+                  style={{
+                    background: "var(--color-surface-raised)",
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "var(--radius-xl)",
+                    padding: "var(--space-7)",
+                  }}
+                >
+                  <v.icon size={28} style={{ color: "var(--color-primary)" }} />
                   <h3>{v.title}</h3>
                   <p>{v.desc}</p>
                 </motion.div>
@@ -92,7 +143,18 @@ export function AboutPage() {
             <StaggerContainer stagger={0.1}>
               <div className="tech-grid">
                 {team.map((t) => (
-                  <motion.div key={t.role} className="tech-card" variants={staggerItem} whileHover={{ y: -3 }}>
+                  <motion.div
+                    key={t.role}
+                    className="tech-card"
+                    variants={staggerItem}
+                    whileHover={{ y: -3 }}
+                    style={{
+                      background: "var(--color-surface)",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: "var(--radius-xl)",
+                      padding: "var(--space-6)",
+                    }}
+                  >
                     <h3>{t.role}</h3>
                     <p>{t.detail}</p>
                   </motion.div>
@@ -109,7 +171,7 @@ export function AboutPage() {
             <h2>See it in action</h2>
             <p>Get started with Telco Retain today.</p>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Link to="/signup" className="primary-button" style={{ minHeight: 48, padding: "0 28px", fontSize: 15 }}>
+              <Link to="/signup" className="btn btn-primary btn-lg">
                 Create your account <ArrowRight size={18} />
               </Link>
             </motion.div>

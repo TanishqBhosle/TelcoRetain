@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ArrowRight, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Check, Menu, X } from "lucide-react";
 import { FadeIn, StaggerContainer, staggerItem, SlideUp } from "../components/animations";
 
 const plans = [
@@ -56,6 +57,8 @@ const plans = [
 ];
 
 export function PricingPage() {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
     <div className="landing">
       <header className="landing-nav">
@@ -68,10 +71,47 @@ export function PricingPage() {
             <Link to="/about">About</Link>
             <Link to="/pricing" className="nav-active">Pricing</Link>
             <Link to="/contact">Contact</Link>
-            <Link to="/signin" className="primary-button" style={{ minHeight: 36, padding: "0 16px", fontSize: 13 }}>Sign in</Link>
+            <Link to="/signin" className="btn btn-primary btn-sm">Sign in</Link>
           </motion.div>
+          <button
+            className="mobile-nav-toggle landing-mobile-toggle"
+            onClick={() => setMobileNavOpen(!mobileNavOpen)}
+            aria-label={mobileNavOpen ? "Close navigation" : "Open navigation"}
+          >
+            {mobileNavOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </header>
+
+      <AnimatePresence>
+        {mobileNavOpen && (
+          <>
+            <motion.div
+              className="mobile-nav-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileNavOpen(false)}
+            />
+            <motion.aside
+              className="mobile-nav-drawer"
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              <div className="mobile-sidebar-brand">TelcoRetain</div>
+              <nav className="mobile-drawer-links">
+                <Link to="/" onClick={() => setMobileNavOpen(false)}>Home</Link>
+                <Link to="/about" onClick={() => setMobileNavOpen(false)}>About</Link>
+                <Link to="/pricing" onClick={() => setMobileNavOpen(false)}>Pricing</Link>
+                <Link to="/contact" onClick={() => setMobileNavOpen(false)}>Contact</Link>
+                <Link to="/signin" className="btn btn-primary btn-sm" onClick={() => setMobileNavOpen(false)}>Sign in</Link>
+              </nav>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
       <section className="pricing-hero">
         <motion.div
@@ -96,11 +136,11 @@ export function PricingPage() {
                 variants={staggerItem}
                 whileHover={{ y: -6, boxShadow: "0 16px 40px rgba(0,0,0,0.1)" }}
               >
-                {plan.highlighted ? <span className="pricing-badge">Most popular</span> : null}
+                {plan.highlighted && <span className="pricing-badge">Most popular</span>}
                 <h3>{plan.name}</h3>
                 <div className="pricing-price">
                   <strong>{plan.price}</strong>
-                  {plan.period ? <span>{plan.period}</span> : null}
+                  {plan.period && <span>{plan.period}</span>}
                 </div>
                 <p className="pricing-desc">{plan.description}</p>
                 <ul className="pricing-features">
@@ -111,15 +151,12 @@ export function PricingPage() {
                     </li>
                   ))}
                 </ul>
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Link
-                    to={plan.name === "Enterprise" ? "/contact" : "/signup"}
-                    className={`primary-button ${plan.highlighted ? "" : "pricing-outline"}`}
-                    style={{ width: "100%", minHeight: 44, justifyContent: "center" }}
-                  >
-                    {plan.cta} <ArrowRight size={16} />
-                  </Link>
-                </motion.div>
+                <Link
+                  to={plan.name === "Enterprise" ? "/contact" : "/signup"}
+                  className={`btn ${plan.highlighted ? "btn-primary" : "btn-outline"} btn-lg pricing-cta`}
+                >
+                  {plan.cta} <ArrowRight size={16} />
+                </Link>
               </motion.div>
             ))}
           </div>
@@ -131,11 +168,9 @@ export function PricingPage() {
           <div className="cta-inner">
             <h2>Questions about pricing?</h2>
             <p>Our team can help you find the right plan for your operation.</p>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Link to="/contact" className="primary-button" style={{ minHeight: 48, padding: "0 28px", fontSize: 15 }}>
-                Contact us <ArrowRight size={18} />
-              </Link>
-            </motion.div>
+            <Link to="/contact" className="btn btn-primary btn-lg">
+              Contact us <ArrowRight size={18} />
+            </Link>
           </div>
         </section>
       </SlideUp>

@@ -3,6 +3,27 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { api, unwrap } from "../lib/api";
 
+interface FieldErrors {
+  full_name?: string;
+  email?: string;
+  password?: string;
+}
+
+interface Touched {
+  full_name?: boolean;
+  email?: boolean;
+  password?: boolean;
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("TIMEOUT")), ms)
+    ),
+  ]);
+}
+
 export function SignUpPage() {
   const navigate = useNavigate();
   const [full_name, setFullName] = useState("");
@@ -12,15 +33,70 @@ export function SignUpPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [touched, setTouched] = useState<Touched>({});
+
+  function validateField(field: keyof FieldErrors, value: string): string {
+    if (!value.trim()) {
+      const labels: Record<keyof FieldErrors, string> = {
+        full_name: "Full name",
+        email: "Email",
+        password: "Password",
+      };
+      return `${labels[field]} is required`;
+    }
+    if (field === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      return "Please enter a valid email address";
+    }
+    return "";
+  }
+
+  function handleBlur(field: keyof FieldErrors) {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const values: Record<keyof FieldErrors, string> = {
+      full_name,
+      email,
+      password,
+    };
+    const errorMsg = validateField(field, values[field]);
+    setFieldErrors((prev) => ({ ...prev, [field]: errorMsg }));
+  }
+
+  function validateAll(): boolean {
+    const errors: FieldErrors = {
+      full_name: validateField("full_name", full_name),
+      email: validateField("email", email),
+      password: validateField("password", password),
+    };
+    setFieldErrors(errors);
+    setTouched({ full_name: true, email: true, password: true });
+    return !errors.full_name && !errors.email && !errors.password;
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (!validateAll()) return;
+
     setLoading(true);
     setError("");
     try {
-      await api.post("/auth/register", { full_name, email, password, gender: gender || undefined, role_name: "Business Analyst" });
+      const registerPromise = api.post("/auth/register", {
+        full_name,
+        email,
+        password,
+        gender: gender || undefined,
+        role_name: "Business Analyst",
+      });
+
+      await withTimeout(registerPromise, 15000);
       navigate("/signin");
-    } catch {
-      setError("Registration failed. Email may already be in use.");
+    } catch (err) {
+      if (err instanceof Error && err.message === "TIMEOUT") {
+        setError("Request timed out. Please try again.");
+      } else {
+        // Generic security-safe message that doesn't reveal whether an account exists
+        setError("Unable to create account. Please try a different email or try again later.");
+      }
     } finally {
       setLoading(false);
     }
@@ -42,18 +118,44 @@ export function SignUpPage() {
         >
           <img src="/logo.svg" alt="TelcoRetain" className="brand-logo" />
         </motion.div>
-        <form onSubmit={submit} className="form">
+        <form onSubmit={submit} className="form" noValidate>
           <motion.label initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25, duration: 0.3 }}>
             Full Name
-            <input value={full_name} onChange={(e) => setFullName(e.target.value)} type="text" required />
+            <input
+              value={full_name}
+              onChange={(e) => setFullName(e.target.value)}
+              onBlur={() => handleBlur("full_name")}
+              type="text"
+            />
+            {touched.full_name && fieldErrors.full_name && (
+              <span className="field-error">{fieldErrors.full_name}</span>
+            )}
           </motion.label>
           <motion.label initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.3 }}>
             Email
-            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required autoComplete="email" />
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => handleBlur("email")}
+              type="email"
+              autoComplete="email"
+            />
+            {touched.email && fieldErrors.email && (
+              <span className="field-error">{fieldErrors.email}</span>
+            )}
           </motion.label>
           <motion.label initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35, duration: 0.3 }}>
             Password
-            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required autoComplete="new-password" />
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onBlur={() => handleBlur("password")}
+              type="password"
+              autoComplete="new-password"
+            />
+            {touched.password && fieldErrors.password && (
+              <span className="field-error">{fieldErrors.password}</span>
+            )}
           </motion.label>
           <motion.label initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4, duration: 0.3 }}>
             Gender (optional)
@@ -68,21 +170,29 @@ export function SignUpPage() {
             <motion.p className="error-text" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}>{error}</motion.p>
           ) : null}
           <motion.button
-            className="primary-button"
+            className="btn btn-primary"
+            style={{ width: '100%' }}
             disabled={loading}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
           >
-            {loading ? "Creating account" : "Create account"}
+            {loading ? (
+              <>
+                <span className="btn-spinner" aria-hidden="true" />
+                Creating account
+              </>
+            ) : (
+              "Create account"
+            )}
           </motion.button>
         </form>
         <motion.p
-          style={{ textAlign: "center", marginTop: 16, fontSize: 13, color: "#64746f" }}
+          className="auth-footer"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          Already have an account? <Link to="/signin" style={{ color: "#1d8a8a", fontWeight: 700 }}>Sign in</Link>
+          Already have an account? <Link to="/signin">Sign in</Link>
         </motion.p>
       </motion.section>
     </main>

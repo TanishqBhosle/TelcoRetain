@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -11,6 +11,8 @@ import {
   HardDrive,
 } from "lucide-react";
 import { api, unwrap } from "../../../lib/api";
+import { SkeletonLoader } from "../../../components/SkeletonLoader";
+import { ErrorState } from "../../../components/ErrorState";
 
 type SystemHealth = {
   status: string;
@@ -31,13 +33,20 @@ type AdminKPI = {
 export function AdminDashboard() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
+  const fetchHealth = useCallback(() => {
+    setLoading(true);
+    setError(false);
     unwrap<SystemHealth>(api.get("/admin/system-health"))
       .then(setHealth)
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchHealth();
+  }, [fetchHealth]);
 
   const kpis: AdminKPI[] = [
     { label: "System Status", value: health?.status ?? "Loading...", icon: Activity, color: "#10b981" },
@@ -61,25 +70,35 @@ export function AdminDashboard() {
         <p className="admin-page-subtitle">Monitor platform health and system metrics</p>
       </motion.div>
 
-      <div className="admin-kpi-grid">
-        {kpis.map((kpi, i) => (
-          <motion.div
-            key={kpi.label}
-            className="admin-kpi-card"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + i * 0.05, duration: 0.4 }}
-          >
-            <div className="admin-kpi-icon" style={{ backgroundColor: `${kpi.color}20`, color: kpi.color }}>
-              <kpi.icon size={24} />
-            </div>
-            <div className="admin-kpi-content">
-              <span className="admin-kpi-label">{kpi.label}</span>
-              <span className="admin-kpi-value">{loading ? "..." : kpi.value}</span>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      {loading ? (
+        <SkeletonLoader variant="card" count={8} />
+      ) : error ? (
+        <ErrorState
+          heading="Failed to load system health"
+          description="Unable to retrieve system metrics. Please check your connection and try again."
+          onRetry={fetchHealth}
+        />
+      ) : (
+        <div className="admin-kpi-grid">
+          {kpis.map((kpi, i) => (
+            <motion.div
+              key={kpi.label}
+              className="admin-kpi-card"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + i * 0.05, duration: 0.4 }}
+            >
+              <div className="admin-kpi-icon" style={{ backgroundColor: `${kpi.color}20`, color: kpi.color }}>
+                <kpi.icon size={24} />
+              </div>
+              <div className="admin-kpi-content">
+                <span className="admin-kpi-label">{kpi.label}</span>
+                <span className="admin-kpi-value">{kpi.value}</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       <div className="admin-section">
         <h3 className="admin-section-title">Quick Actions</h3>

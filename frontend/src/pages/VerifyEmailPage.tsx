@@ -53,9 +53,9 @@ export function VerifyEmailPage() {
           </motion.div>
         )}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-          <Link to="/signin" style={{ display: "inline-block", marginTop: 16, color: "#1d8a8a", fontWeight: 700, fontSize: 14 }}>
-            Go to Sign In
-          </Link>
+          <p className="auth-footer">
+            <Link to="/signin">Go to Sign In</Link>
+          </p>
         </motion.div>
       </motion.section>
     </main>

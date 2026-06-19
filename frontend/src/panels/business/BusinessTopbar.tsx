@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LogOut, Bell, User } from "lucide-react";
 import { useAuthStore } from "../../state/auth";
+import { Breadcrumbs } from "../../components/Breadcrumbs";
+import { MobileNav } from "../../components/MobileNav";
 
 export function BusinessTopbar() {
   const navigate = useNavigate();
@@ -15,7 +17,10 @@ export function BusinessTopbar() {
       transition={{ delay: 0.2, duration: 0.4 }}
     >
       <div className="business-topbar-left">
-        <h1>Business Portal</h1>
+        <MobileNav>
+          <div className="mobile-sidebar-brand">Telco Retain</div>
+        </MobileNav>
+        <Breadcrumbs />
       </div>
       <div className="business-topbar-right">
         <div className="business-user-info">

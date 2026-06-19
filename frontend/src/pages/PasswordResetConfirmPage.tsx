@@ -50,9 +50,9 @@ export function PasswordResetConfirmPage() {
           <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 200 }}>
             <CheckCircle size={48} color="#146b45" style={{ margin: "16px auto", display: "block" }} />
             <p style={{ color: "#146b45", fontSize: 14, textAlign: "center" }}>Password reset successfully!</p>
-            <Link to="/signin" style={{ display: "block", textAlign: "center", marginTop: 16, color: "#1d8a8a", fontWeight: 700 }}>
-              Sign in with new password
-            </Link>
+            <p className="auth-footer">
+              <Link to="/signin">Sign in with new password</Link>
+            </p>
           </motion.div>
         ) : (
           <>
@@ -67,7 +67,7 @@ export function PasswordResetConfirmPage() {
                 <input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} type="password" autoComplete="new-password" minLength={8} required />
               </motion.label>
               {error && <motion.p className="error-text" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{error}</motion.p>}
-              <motion.button className="primary-button" disabled={loading} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+              <motion.button className="btn btn-primary" style={{ width: '100%' }} disabled={loading} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
                 {loading ? "Resetting..." : "Reset password"}
               </motion.button>
             </form>

@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LogOut, Settings, Bell } from "lucide-react";
 import { useAuthStore } from "../../state/auth";
+import { Breadcrumbs } from "../../components/Breadcrumbs";
+import { MobileNav } from "../../components/MobileNav";
 
 export function AdminTopbar() {
   const navigate = useNavigate();
@@ -15,7 +17,10 @@ export function AdminTopbar() {
       transition={{ delay: 0.2, duration: 0.4 }}
     >
       <div className="admin-topbar-left">
-        <h1>Admin Portal</h1>
+        <MobileNav>
+          <div className="mobile-sidebar-brand">Telco Retain</div>
+        </MobileNav>
+        <Breadcrumbs />
       </div>
       <div className="admin-topbar-right">
         <div className="admin-user-info">
