@@ -1,14 +1,20 @@
-"""Train churn models on IBM Telco Customer Churn Dataset.
+"""Local reproduction script for training churn models on IBM Telco Customer Churn Dataset.
+
+WARNING: This script is for LOCAL REPRODUCTION ONLY. It is NOT used by the backend
+at runtime. The backend loads pre-trained artifacts from ml/models/ at startup.
+
+For production training, use the Google Colab notebook at:
+    ml/training/google_colab_training.ipynb
 
 Usage:
     python scripts/train_telco_models.py
     python scripts/train_telco_models.py --input data/WA_Fn-UseC_-Telco-Customer-Churn.csv
 
-This script implements the full ML pipeline from the Colab notebook:
+This script implements the full ML pipeline for local reproducibility:
 1. Data cleaning & preprocessing
 2. Feature engineering
 3. Model training (LR, RF, XGBoost, LightGBM)
-4. Evaluation & artifact saving
+4. Evaluation & artifact saving to ml/models/
 """
 
 from __future__ import annotations
@@ -26,7 +32,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
-    confusion_matrix,
     f1_score,
     precision_score,
     recall_score,
@@ -164,17 +169,6 @@ def evaluate_model(
     return metrics
 
 
-def generate_offer(probability: float) -> str:
-    if probability > 0.85:
-        return "20% Recharge Discount"
-    elif probability > 0.70:
-        return "5GB Free Data Booster"
-    elif probability > 0.50:
-        return "OTT Subscription Offer"
-    else:
-        return "Loyalty Reward"
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train telco churn models")
     parser.add_argument(
@@ -186,13 +180,8 @@ def main() -> None:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("ml/artifacts"),
+        default=Path("ml/models"),
         help="Directory to save model artifacts",
-    )
-    parser.add_argument(
-        "--dataset-version-id",
-        default=None,
-        help="Accepted for API-triggered retraining metadata",
     )
     args = parser.parse_args()
 
@@ -237,36 +226,40 @@ def main() -> None:
         trained_models[name] = model
 
     ranked = sorted(all_metrics, key=lambda m: all_metrics[m]["roc_auc"], reverse=True)
-    selected = ranked[:2]
+    best_model_name = ranked[0]
 
-    print(f"\nSelected models (by ROC-AUC): {selected}")
-    for name in selected:
-        joblib.dump(trained_models[name], args.output_dir / f"{name}.pkl")
-        print(f"  Saved {name}.pkl")
+    print(f"\nBest model (by ROC-AUC): {best_model_name}")
+    joblib.dump(trained_models[best_model_name], args.output_dir / "churn_model.pkl")
+    print("  Saved churn_model.pkl")
 
     joblib.dump(feature_columns, args.output_dir / "feature_columns.pkl")
-    joblib.dump(encoders, args.output_dir / "telco_encoders.pkl")
+    print("  Saved feature_columns.pkl")
+
+    joblib.dump(encoders, args.output_dir / "label_encoders.pkl")
+    print("  Saved label_encoders.pkl")
+
+    from datetime import datetime, timezone
+
+    class_distribution = y.value_counts().to_dict()
 
     metadata = {
-        "dataset": "IBM Telco Customer Churn",
-        "feature_columns": feature_columns,
-        "selected_models": selected,
-        "metrics": all_metrics,
-        "dataset_version_id": args.dataset_version_id,
-        "offer_engine": {
-            "thresholds": [0.85, 0.70, 0.50],
-            "offers": [
-                "20% Recharge Discount",
-                "5GB Free Data Booster",
-                "OTT Subscription Offer",
-                "Loyalty Reward",
-            ],
+        "model_type": best_model_name,
+        "training_date": datetime.now(timezone.utc).isoformat(),
+        "dataset_name": "WA_Fn-UseC_-Telco-Customer-Churn.csv",
+        "feature_count": len(feature_columns),
+        "performance_metrics": {
+            "accuracy": all_metrics[best_model_name]["accuracy"],
+            "precision": all_metrics[best_model_name]["precision"],
+            "recall": all_metrics[best_model_name]["recall"],
+            "f1_score": all_metrics[best_model_name]["f1_score"],
+            "roc_auc": all_metrics[best_model_name]["roc_auc"],
         },
+        "class_distribution": {str(k): int(v) for k, v in class_distribution.items()},
     }
-    (args.output_dir / "metadata.json").write_text(
+    (args.output_dir / "model_metadata.json").write_text(
         json.dumps(metadata, indent=2), encoding="utf-8"
     )
-    print(f"\nMetadata saved to {args.output_dir / 'metadata.json'}")
+    print(f"\nMetadata saved to {args.output_dir / 'model_metadata.json'}")
     print("\nTraining complete.")
 
 

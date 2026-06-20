@@ -1,45 +1,40 @@
-"""Churn prediction facade over loaded model artifacts."""
+"""Churn prediction using pre-loaded model artifacts."""
 
 from typing import Tuple
 
-import numpy as np
+import pandas as pd
 
-from ml.inference.model_loader import ModelRegistry
+from ml.inference.artifact_loader import ArtifactRegistry
 
 
 class ChurnPredictor:
+    """Single-model churn predictor using ArtifactRegistry."""
+
     @staticmethod
-    def predict(features_df) -> Tuple[float, float]:
-        models = ModelRegistry.get_loaded_models()
-        if not models:
-            raise RuntimeError("No ML models are loaded")
+    def predict(features_df: pd.DataFrame) -> Tuple[float, float, str]:
+        """Run churn inference on a preprocessed feature DataFrame.
 
-        # Get the expected feature columns from the features DataFrame
-        expected_features = set(features_df.columns)
+        Args:
+            features_df: Single-row DataFrame with model-compatible features.
 
-        probabilities = []
-        for name, model in models.items():
-            # Skip models trained on incompatible feature sets
-            if hasattr(model, "feature_names_in_"):
-                model_features = set(str(f) for f in model.feature_names_in_)
-                if not model_features.issubset(expected_features) and not expected_features.issubset(model_features):
-                    continue
-            elif hasattr(model, "n_features_in_"):
-                if model.n_features_in_ != features_df.shape[1]:
-                    continue
+        Returns:
+            Tuple of (churn_probability, confidence_score, risk_category).
 
-            try:
-                if hasattr(model, "predict_proba"):
-                    probabilities.append(float(model.predict_proba(features_df)[0][1]))
-                elif hasattr(model, "predict"):
-                    probabilities.append(float(np.asarray(model.predict(features_df))[0]))
-            except (ValueError, Exception):
-                # Model failed prediction (feature mismatch, etc.) — skip it
-                continue
+        Raises:
+            RuntimeError: If no model is loaded in the ArtifactRegistry.
+        """
+        model = ArtifactRegistry.get_model()
+        if model is None:
+            raise RuntimeError("No ML model loaded")
 
-        if not probabilities:
-            raise RuntimeError("No compatible ML models could produce a prediction for the given features")
-
-        probability = max(0.0, min(1.0, float(np.mean(probabilities))))
+        probability = float(model.predict_proba(features_df)[0][1])
         confidence = max(probability, 1.0 - probability)
-        return probability, confidence
+
+        if probability >= 0.70:
+            risk_category = "HIGH"
+        elif probability >= 0.40:
+            risk_category = "MEDIUM"
+        else:
+            risk_category = "LOW"
+
+        return probability, confidence, risk_category

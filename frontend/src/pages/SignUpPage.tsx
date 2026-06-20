@@ -2,6 +2,20 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { api, unwrap } from "../lib/api";
+import { useAuthStore } from "../state/auth";
+import { isAdminRole } from "../components/RoleGuard";
+
+type TokenResponse = {
+  access_token: string;
+  refresh_token: string;
+};
+
+type User = {
+  id: string;
+  email: string;
+  full_name: string;
+  role?: { name: string };
+};
 
 interface FieldErrors {
   full_name?: string;
@@ -26,10 +40,10 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 
 export function SignUpPage() {
   const navigate = useNavigate();
+  const { setSession, setUser } = useAuthStore();
   const [full_name, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [gender, setGender] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -84,18 +98,27 @@ export function SignUpPage() {
         full_name,
         email,
         password,
-        gender: gender || undefined,
         role_name: "Business Analyst",
       });
 
       await withTimeout(registerPromise, 15000);
-      navigate("/signin");
+
+      // Auto login immediately
+      const tokens = await unwrap<TokenResponse>(api.post("/auth/login", { email, password }));
+      setSession(tokens.access_token, tokens.refresh_token);
+      const userObj = await unwrap<User>(api.get("/auth/me"));
+      setUser(userObj);
+
+      if (isAdminRole(userObj.role?.name)) {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/app/dashboard");
+      }
     } catch (err) {
       if (err instanceof Error && err.message === "TIMEOUT") {
         setError("Request timed out. Please try again.");
       } else {
-        // Generic security-safe message that doesn't reveal whether an account exists
-        setError("Unable to create account. Please try a different email or try again later.");
+        setError("Account created, but automatic sign in failed. Please try signing in manually.");
       }
     } finally {
       setLoading(false);
@@ -157,15 +180,7 @@ export function SignUpPage() {
               <span className="field-error">{fieldErrors.password}</span>
             )}
           </motion.label>
-          <motion.label initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4, duration: 0.3 }}>
-            Gender (optional)
-            <select value={gender} onChange={(e) => setGender(e.target.value)}>
-              <option value="">Prefer not to say</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </motion.label>
+
           {error ? (
             <motion.p className="error-text" initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}>{error}</motion.p>
           ) : null}

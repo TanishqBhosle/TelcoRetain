@@ -61,8 +61,8 @@ class Settings(BaseSettings):
     RATE_LIMIT_PREDICTION: str = "60/minute"
     RATE_LIMIT_DEFAULT: str = "120/minute"
 
-    # --- ML Artifacts ---
-    ML_ARTIFACTS_PATH: str = "./ml/artifacts"
+    # --- ML Models ---
+    ML_MODELS_PATH: str = "./ml/models"
     ML_MODEL_VERSION: str = "v1.0"
 
     # --- Email ---

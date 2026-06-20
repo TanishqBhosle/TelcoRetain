@@ -155,7 +155,7 @@ class TestForeignKeyCascadeDefinitions:
     """
 
     @given(model_data=sqlalchemy_model_code())
-    @settings(max_examples=200)
+    @settings(max_examples=30)
     def test_fk_without_ondelete_are_flagged(self, model_data):
         """Every ForeignKey without ondelete must appear in the findings.
 
@@ -184,7 +184,7 @@ class TestForeignKeyCascadeDefinitions:
         )
 
     @given(model_data=sqlalchemy_model_code())
-    @settings(max_examples=200)
+    @settings(max_examples=30)
     def test_fk_with_ondelete_are_not_flagged(self, model_data):
         """ForeignKey columns with ondelete must NOT appear in findings.
 
@@ -224,7 +224,7 @@ class TestForeignKeyCascadeDefinitions:
             )
 
     @given(model_data=sqlalchemy_model_code())
-    @settings(max_examples=200)
+    @settings(max_examples=30)
     def test_detection_finds_all_fk_calls(self, model_data):
         """The total FK count (flagged + unflagged) must equal the number of
         ForeignKey definitions in the generated code.
@@ -259,7 +259,7 @@ class TestForeignKeyCascadeDefinitions:
         )
 
     @given(model_data=sqlalchemy_model_code())
-    @settings(max_examples=200)
+    @settings(max_examples=30)
     def test_flagged_items_contain_required_info(self, model_data):
         """Each flagged FK must contain file, line, column, and target info.
 

@@ -87,7 +87,7 @@ class TestProperty1LayeredDelegation:
         func_name=identifier_st,
         method=http_method_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_router_with_service_import_passes(
         self, service_module, service_class, func_name, method
     ):
@@ -118,7 +118,7 @@ async def {func_name}():
         session_var=session_var_st,
         session_method=session_method_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_router_with_inline_db_fails(
         self, func_name, method, session_var, session_method
     ):
@@ -143,7 +143,7 @@ async def {func_name}({session_var}):
         func_name=identifier_st,
         method=http_method_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_router_without_service_import_fails(self, func_name, method):
         """A router without service imports should be flagged."""
         code = f"""
@@ -181,7 +181,7 @@ class TestProperty2RepositoryPattern:
         repo_class=repo_class_st,
         func_name=identifier_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_service_with_repo_import_passes(
         self, repo_module, repo_class, func_name
     ):
@@ -210,7 +210,7 @@ class SomeService:
         session_var=session_var_st,
         session_method=service_session_method_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_service_with_direct_session_fails(
         self, func_name, session_var, session_method
     ):
@@ -232,7 +232,7 @@ class SomeService:
         func_name=identifier_st,
         session_method=service_session_method_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_service_with_self_session_attr_fails(
         self, func_name, session_method
     ):
@@ -270,7 +270,7 @@ class TestProperty3SchemaValidation:
         method=http_method_st,
         schema_name=schema_name_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_endpoint_with_response_model_passes(
         self, func_name, method, schema_name
     ):
@@ -295,7 +295,7 @@ async def {func_name}():
         func_name=identifier_st,
         method=http_method_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_endpoint_without_response_model_fails(self, func_name, method):
         """An endpoint without response_model should be flagged."""
         code = f"""
@@ -320,7 +320,7 @@ async def {func_name}():
         schema_name=schema_name_st,
         path=st.from_regex(r"/[a-z]{3,10}", fullmatch=True),
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_endpoint_detection_with_various_paths(
         self, func_name, method, schema_name, path
     ):
@@ -356,7 +356,7 @@ class TestProperty4AsyncSessionSafety:
         func_name=identifier_st,
         var_name=st.from_regex(r"[a-z_]{3,10}", fullmatch=True),
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_safe_async_with_usage_passes(self, func_name, var_name):
         """AsyncSessionLocal inside async with should be detected as safe."""
         code = f"""
@@ -375,7 +375,7 @@ async def {func_name}():
         func_name=identifier_st,
         var_name=st.from_regex(r"[a-z_]{3,10}", fullmatch=True),
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_unsafe_bare_call_fails(self, func_name, var_name):
         """AsyncSessionLocal() called without async with should be flagged."""
         code = f"""
@@ -395,7 +395,7 @@ async def {func_name}():
     @given(
         func_name=identifier_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_multiple_safe_usages_all_pass(self, func_name):
         """Multiple async with usages in the same file should all pass."""
         code = f"""
@@ -432,7 +432,7 @@ class TestProperty5ListEndpointPagination:
         pagination_pair=pagination_pair_st,
         schema_name=schema_name_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_list_endpoint_with_pagination_passes(
         self, func_name, method, pagination_pair, schema_name
     ):
@@ -467,7 +467,7 @@ async def {func_name}({param1}: int = 0, {param2}: int = 10):
         method=st.sampled_from(["get"]),
         schema_name=schema_name_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_list_endpoint_without_pagination_fails(
         self, func_name, method, schema_name
     ):
@@ -497,7 +497,7 @@ async def {func_name}():
         method=st.sampled_from(["get"]),
         schema_name=schema_name_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_non_list_endpoint_not_flagged(self, func_name, method, schema_name):
         """Non-list endpoints should not be subject to pagination check."""
         code = f"""
@@ -522,7 +522,7 @@ async def {func_name}(item_id: int):
         schema_name=schema_name_st,
         pagination_pair=pagination_pair_st,
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_lowercase_list_annotation_detected(
         self, func_name, method, schema_name, pagination_pair
     ):

@@ -21,7 +21,7 @@ router = APIRouter(tags=["Datasets"])
 
 ADMIN_ROLES = ["Super Admin", "Admin"]
 
-UPLOAD_DIR = Path(settings.ML_ARTIFACTS_PATH).parent / "uploads"
+UPLOAD_DIR = Path(settings.ML_MODELS_PATH).parent / "uploads"
 ALLOWED_EXTENSIONS = {".csv", ".parquet", ".xlsx"}
 MAX_FILE_SIZE = 500 * 1024 * 1024  # 500MB
 

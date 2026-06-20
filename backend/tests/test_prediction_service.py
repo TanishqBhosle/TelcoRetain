@@ -1,103 +1,88 @@
-"""Tests for prediction service."""
+"""Tests for the refactored prediction service."""
 
-import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch, MagicMock
 
+import pandas as pd
 import pytest
 
-from app.exceptions.custom import CustomerNotFoundError, ModelNotLoadedError, NotFoundError
+from app.schemas.predictions import PredictionResponse
+from app.services.prediction_service import PredictionService
 
 
-@pytest.mark.asyncio
 class TestPredictionService:
-    """Tests for PredictionService methods."""
+    """Tests for the stateless PredictionService.predict method."""
 
-    @patch("app.services.prediction_service.SupportTicketRepository")
-    @patch("app.services.prediction_service.NetworkQualityRepository")
-    @patch("app.services.prediction_service.UsageMetricsRepository")
-    @patch("app.services.prediction_service.ModelRepository")
-    @patch("app.services.prediction_service.PredictionRepository")
-    @patch("app.services.prediction_service.CustomerRepository")
-    async def test_predict_single_no_active_model(
-        self, mock_cust_repo, mock_pred_repo, mock_model_repo,
-        mock_usage_repo, mock_network_repo, mock_support_repo
+    @patch("app.services.prediction_service.RecommendationEngine")
+    @patch("app.services.prediction_service.SHAPExplainer")
+    @patch("app.services.prediction_service.ChurnPredictor")
+    @patch("app.services.prediction_service.FeaturePipeline")
+    def test_predict_returns_prediction_response(
+        self, mock_pipeline, mock_predictor, mock_shap, mock_reco
     ):
-        mock_model_repo.get_active_model.return_value = None
-
-        from app.services.prediction_service import PredictionService
-        service = PredictionService(
-            mock_cust_repo, mock_pred_repo, mock_model_repo,
-            mock_usage_repo, mock_network_repo, mock_support_repo
+        """Full pipeline produces a valid PredictionResponse."""
+        mock_pipeline.transform.return_value = pd.DataFrame(
+            [[0.0] * 5], columns=["a", "b", "c", "d", "e"]
         )
+        mock_predictor.predict.return_value = (0.75, 0.75, "HIGH")
+        mock_shap.explain.return_value = [
+            {
+                "feature_name": "tenure",
+                "shap_value": -0.3,
+                "feature_value": "2",
+                "direction": "decreases_churn",
+                "rank": 1,
+            }
+        ]
+        mock_reco.generate_offers.return_value = [
+            {
+                "offer_type": "discount",
+                "description": "20% off",
+                "validity_days": 180,
+                "expected_impact": "high",
+                "priority": 100,
+            }
+        ]
 
-        with patch("app.services.prediction_service.ModelRegistry") as mock_registry:
-            mock_registry.is_loaded.return_value = True
-            with pytest.raises(ModelNotLoadedError):
-                await service.predict_single(uuid.uuid4(), MagicMock())
+        raw_input = {"tenure": 2, "MonthlyCharges": 90.0, "Contract": "Month-to-month"}
+        result = PredictionService.predict(raw_input)
 
-    @patch("app.services.prediction_service.SupportTicketRepository")
-    @patch("app.services.prediction_service.NetworkQualityRepository")
-    @patch("app.services.prediction_service.UsageMetricsRepository")
-    @patch("app.services.prediction_service.ModelRepository")
-    @patch("app.services.prediction_service.PredictionRepository")
-    @patch("app.services.prediction_service.CustomerRepository")
-    async def test_predict_single_customer_not_found(
-        self, mock_cust_repo, mock_pred_repo, mock_model_repo,
-        mock_usage_repo, mock_network_repo, mock_support_repo
-    ):
-        mock_model = MagicMock()
-        mock_model_repo.get_active_model.return_value = mock_model
-        mock_cust_repo.get_by_id.return_value = None
+        assert isinstance(result, PredictionResponse)
+        assert result.churn_probability == 0.75
+        assert result.risk_category == "HIGH"
+        assert result.confidence_score == 0.75
+        assert len(result.top_churn_drivers) == 1
+        assert result.top_churn_drivers[0].feature_name == "tenure"
+        assert len(result.recommendations) == 1
+        assert result.recommendations[0].offer_type == "discount"
+        assert result.prediction_id is not None
 
-        from app.services.prediction_service import PredictionService
-        service = PredictionService(
-            mock_cust_repo, mock_pred_repo, mock_model_repo,
-            mock_usage_repo, mock_network_repo, mock_support_repo
-        )
+    @patch("app.services.prediction_service.RecommendationEngine")
+    @patch("app.services.prediction_service.SHAPExplainer")
+    @patch("app.services.prediction_service.ChurnPredictor")
+    @patch("app.services.prediction_service.FeaturePipeline")
+    def test_predict_low_risk(self, mock_pipeline, mock_predictor, mock_shap, mock_reco):
+        """Low risk prediction returns correct category."""
+        mock_pipeline.transform.return_value = pd.DataFrame([[0.0]], columns=["a"])
+        mock_predictor.predict.return_value = (0.15, 0.85, "LOW")
+        mock_shap.explain.return_value = []
+        mock_reco.generate_offers.return_value = []
 
-        with patch("app.services.prediction_service.ModelRegistry") as mock_registry:
-            mock_registry.is_loaded.return_value = True
-            with pytest.raises(CustomerNotFoundError):
-                await service.predict_single(uuid.uuid4(), MagicMock())
+        result = PredictionService.predict({"tenure": 60, "MonthlyCharges": 30.0})
 
-    @patch("app.services.prediction_service.SupportTicketRepository")
-    @patch("app.services.prediction_service.NetworkQualityRepository")
-    @patch("app.services.prediction_service.UsageMetricsRepository")
-    @patch("app.services.prediction_service.ModelRepository")
-    @patch("app.services.prediction_service.PredictionRepository")
-    @patch("app.services.prediction_service.CustomerRepository")
-    async def test_get_prediction_not_found(
-        self, mock_cust_repo, mock_pred_repo, mock_model_repo,
-        mock_usage_repo, mock_network_repo, mock_support_repo
-    ):
-        mock_pred_repo.get_by_id.return_value = None
+        assert result.risk_category == "LOW"
+        assert result.churn_probability == 0.15
+        assert result.confidence_score == 0.85
+        assert result.top_churn_drivers == []
+        assert result.recommendations == []
 
-        from app.services.prediction_service import PredictionService
-        service = PredictionService(
-            mock_cust_repo, mock_pred_repo, mock_model_repo,
-            mock_usage_repo, mock_network_repo, mock_support_repo
-        )
+    @patch("app.services.prediction_service.FeaturePipeline")
+    def test_predict_runtime_error_when_model_not_loaded(self, mock_pipeline):
+        """RuntimeError propagates when model is not loaded."""
+        mock_pipeline.transform.return_value = pd.DataFrame([[0.0]], columns=["a"])
 
-        with pytest.raises(NotFoundError):
-            await service.get_prediction(uuid.uuid4())
-
-    @patch("app.services.prediction_service.SupportTicketRepository")
-    @patch("app.services.prediction_service.NetworkQualityRepository")
-    @patch("app.services.prediction_service.UsageMetricsRepository")
-    @patch("app.services.prediction_service.ModelRepository")
-    @patch("app.services.prediction_service.PredictionRepository")
-    @patch("app.services.prediction_service.CustomerRepository")
-    async def test_list_predictions(
-        self, mock_cust_repo, mock_pred_repo, mock_model_repo,
-        mock_usage_repo, mock_network_repo, mock_support_repo
-    ):
-        mock_pred_repo.list_predictions.return_value = [MagicMock(), MagicMock()]
-
-        from app.services.prediction_service import PredictionService
-        service = PredictionService(
-            mock_cust_repo, mock_pred_repo, mock_model_repo,
-            mock_usage_repo, mock_network_repo, mock_support_repo
-        )
-
-        result = await service.list_predictions(page=1, limit=20)
-        assert len(result) == 2
+        with patch(
+            "app.services.prediction_service.ChurnPredictor.predict",
+            side_effect=RuntimeError("No ML model loaded"),
+        ):
+            with pytest.raises(RuntimeError, match="No ML model loaded"):
+                PredictionService.predict({"tenure": 5})

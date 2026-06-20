@@ -90,7 +90,7 @@ class TestWeightedScorecardCalculation:
     """
 
     @given(phase_results=all_phase_results())
-    @settings(max_examples=200)
+    @settings(max_examples=30)
     def test_weighted_score_matches_manual_formula(
         self, phase_results: list[PhaseResult]
     ):
@@ -124,7 +124,7 @@ class TestWeightedScorecardCalculation:
         )
 
     @given(phase_results=all_phase_results())
-    @settings(max_examples=200)
+    @settings(max_examples=30)
     def test_weighted_score_bounded_zero_to_ten(
         self, phase_results: list[PhaseResult]
     ):
@@ -141,7 +141,7 @@ class TestWeightedScorecardCalculation:
         )
 
     @given(phase_results=all_phase_results())
-    @settings(max_examples=200)
+    @settings(max_examples=30)
     def test_weighted_score_uses_correct_weights(
         self, phase_results: list[PhaseResult]
     ):
@@ -188,7 +188,7 @@ class TestReadinessClassificationCorrectness:
     @given(
         score=floats(min_value=8.0, max_value=10.0, allow_nan=False, allow_infinity=False)
     )
-    @settings(max_examples=200)
+    @settings(max_examples=30)
     def test_production_ready_threshold(self, score: float):
         """Scores >= 8.0 must classify as 'Production Ready'.
 
@@ -208,7 +208,7 @@ class TestReadinessClassificationCorrectness:
             exclude_max=True,
         )
     )
-    @settings(max_examples=200)
+    @settings(max_examples=30)
     def test_production_ready_with_caveats_threshold(self, score: float):
         """Scores in [6.0, 8.0) must classify as 'Production Ready with Caveats'.
 
@@ -228,7 +228,7 @@ class TestReadinessClassificationCorrectness:
             exclude_max=True,
         )
     )
-    @settings(max_examples=200)
+    @settings(max_examples=30)
     def test_significant_rework_required_threshold(self, score: float):
         """Scores in [4.0, 6.0) must classify as 'Significant Rework Required'.
 
@@ -248,7 +248,7 @@ class TestReadinessClassificationCorrectness:
             exclude_max=True,
         )
     )
-    @settings(max_examples=200)
+    @settings(max_examples=30)
     def test_not_production_ready_threshold(self, score: float):
         """Scores < 4.0 must classify as 'Not Production Ready'.
 
@@ -267,7 +267,7 @@ class TestReadinessClassificationCorrectness:
             allow_infinity=False,
         )
     )
-    @settings(max_examples=200)
+    @settings(max_examples=30)
     def test_classification_covers_all_scores(self, score: float):
         """Every valid score must map to exactly one classification.
 

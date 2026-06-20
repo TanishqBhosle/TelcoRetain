@@ -2,16 +2,9 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   Users,
-  Shield,
   Database,
   BrainCircuit,
-  Activity,
-  Settings,
   FileText,
-  Wifi,
-  Server,
-  Lock,
-  Bell,
   Cable,
 } from "lucide-react";
 import { SidebarGroup } from "../../components/SidebarGroup";
@@ -20,38 +13,21 @@ const adminNavGroups = [
   {
     label: "Overview",
     items: [
-      { to: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+      { to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard" },
     ],
   },
   {
-    label: "Users & Access",
-    items: [
-      { to: "/admin/users", icon: Users, label: "User Management" },
-      { to: "/admin/roles", icon: Shield, label: "Roles & Permissions" },
-    ],
-  },
-  {
-    label: "ML Platform",
+    label: "Management",
     items: [
       { to: "/admin/datasets", icon: Database, label: "Dataset Management" },
-      { to: "/admin/models", icon: BrainCircuit, label: "Model Registry" },
-      { to: "/admin/model-monitoring", icon: Activity, label: "Model Monitoring" },
+      { to: "/admin/models", icon: BrainCircuit, label: "Model Management" },
+      { to: "/admin/users", icon: Users, label: "User Management" },
     ],
   },
   {
-    label: "Infrastructure",
-    items: [
-      { to: "/admin/settings", icon: Settings, label: "System Settings" },
-      { to: "/admin/api-monitoring", icon: Wifi, label: "API Monitoring" },
-      { to: "/admin/database", icon: Server, label: "Database Health" },
-      { to: "/admin/security", icon: Lock, label: "Security Center" },
-    ],
-  },
-  {
-    label: "Audit",
+    label: "Security & Audit",
     items: [
       { to: "/admin/audit-logs", icon: FileText, label: "Audit Logs" },
-      { to: "/admin/notifications", icon: Bell, label: "Notification Settings" },
     ],
   },
 ];
@@ -64,9 +40,8 @@ export function AdminSidebar() {
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
     >
-      <div className="admin-brand">
-        <Cable size={24} />
-        <span>Telco Retain</span>
+      <div className="brand admin-brand">
+        <img src="/logo.svg" alt="TelcoRetain" className="brand-logo" style={{ height: "32px", width: "auto" }} />
         <span className="admin-badge">Admin</span>
       </div>
       <nav className="admin-nav">
@@ -81,3 +56,4 @@ export function AdminSidebar() {
     </motion.aside>
   );
 }
+

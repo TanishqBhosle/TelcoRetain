@@ -4,6 +4,7 @@ import { LogOut, Settings, Bell } from "lucide-react";
 import { useAuthStore } from "../../state/auth";
 import { Breadcrumbs } from "../../components/Breadcrumbs";
 import { MobileNav } from "../../components/MobileNav";
+import { ThemeToggle } from "../../components/ThemeToggle";
 
 export function AdminTopbar() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export function AdminTopbar() {
           <span className="admin-user-name">{user?.full_name ?? "Admin"}</span>
           <span className="admin-user-role">{user?.role?.name ?? "Super Admin"}</span>
         </div>
+        <ThemeToggle />
         <motion.button
           className="admin-icon-button"
           title="Notifications"

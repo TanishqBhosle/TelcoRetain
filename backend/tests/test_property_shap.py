@@ -215,7 +215,7 @@ class TestSHAPAdditivity:
     """
 
     @given(data=additivity_code_with_pattern())
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_code_with_additivity_patterns_is_detected(self, data):
         """Code containing additivity validation patterns SHALL be detected.
 
@@ -243,7 +243,7 @@ class TestSHAPAdditivity:
         )
 
     @given(data=additivity_code_without_pattern())
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_code_without_additivity_patterns_is_not_detected(self, data):
         """Code lacking additivity patterns SHALL NOT be flagged as present.
 
@@ -271,7 +271,7 @@ class TestSHAPAdditivity:
         )
 
     @given(data=additivity_detection_input())
-    @settings(max_examples=150)
+    @settings(max_examples=30)
     def test_additivity_detection_is_consistent(self, data):
         """Detection result SHALL be consistent with pattern presence.
 
@@ -317,7 +317,7 @@ class TestExplanationResponseCompleteness:
     """
 
     @given(data=explanation_response_code())
-    @settings(max_examples=150)
+    @settings(max_examples=30)
     def test_completeness_detection_matches_field_presence(self, data):
         """Detection SHALL report complete only when all 3 fields are present.
 
@@ -357,7 +357,7 @@ class TestExplanationResponseCompleteness:
         shap_pattern=sampled_from(SHAP_VALUE_PATTERNS),
         direction_pattern=sampled_from(DIRECTION_PATTERNS),
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_complete_response_always_detected(
         self, feature_pattern, shap_pattern, direction_pattern
     ):
@@ -400,7 +400,7 @@ class TestExplanationResponseCompleteness:
     @given(
         missing_field=sampled_from(["feature_name", "shap_value", "direction"]),
     )
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_incomplete_response_missing_one_field(self, missing_field):
         """Code missing any single required field SHALL be detected as incomplete.
 

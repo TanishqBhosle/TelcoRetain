@@ -24,8 +24,6 @@ export function AboutPage() {
           <motion.div className="landing-nav-links" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
             <Link to="/" style={{ fontWeight: 700 }}>Home</Link>
             <Link to="/about" className="nav-active">About</Link>
-            <Link to="/pricing">Pricing</Link>
-            <Link to="/contact">Contact</Link>
             <Link to="/signin" className="btn btn-primary btn-sm" style={{ fontSize: 13 }}>Sign in</Link>
           </motion.div>
           <button
@@ -59,8 +57,6 @@ export function AboutPage() {
               <nav className="mobile-drawer-links">
                 <Link to="/" onClick={() => setMobileNavOpen(false)}>Home</Link>
                 <Link to="/about" onClick={() => setMobileNavOpen(false)}>About</Link>
-                <Link to="/pricing" onClick={() => setMobileNavOpen(false)}>Pricing</Link>
-                <Link to="/contact" onClick={() => setMobileNavOpen(false)}>Contact</Link>
                 <Link to="/signin" className="btn btn-primary btn-sm" onClick={() => setMobileNavOpen(false)}>Sign in</Link>
               </nav>
             </motion.aside>
@@ -184,8 +180,6 @@ export function AboutPage() {
           <div className="brand"><img src="/logo.svg" alt="TelcoRetain" className="brand-logo" /></div>
           <div className="footer-links">
             <Link to="/about">About</Link>
-            <Link to="/pricing">Pricing</Link>
-            <Link to="/contact">Contact</Link>
             <Link to="/signin">Sign in</Link>
           </div>
           <small>&copy; {new Date().getFullYear()} Telco Retain. All rights reserved.</small>
@@ -194,3 +188,4 @@ export function AboutPage() {
     </div>
   );
 }
+

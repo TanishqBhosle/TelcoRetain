@@ -102,7 +102,7 @@ class MLModelValidationPhase(AuditPhase):
                         "or similar). Missing or corrupted artifacts could "
                         "crash the application on startup."
                     ),
-                    file_path=str(inference_dir / "model_loader.py"),
+                    file_path=str(inference_dir / "artifact_loader.py"),
                     recommendation=(
                         "Wrap artifact loading operations in try/except blocks "
                         "to handle FileNotFoundError, EOFError, and "
@@ -272,9 +272,9 @@ class MLModelValidationPhase(AuditPhase):
             return None
 
     def _check_graceful_artifact_handling(self, inference_dir: Path) -> bool:
-        """Verify model loader uses try/except around file loading.
+        """Verify artifact loader uses try/except around file loading.
 
-        Inspects the model loader code (model_loader.py) for exception
+        Inspects the artifact loader code (artifact_loader.py) for exception
         handling around artifact loading operations like joblib.load,
         pickle.load, or file open operations.
 
@@ -284,7 +284,7 @@ class MLModelValidationPhase(AuditPhase):
         Returns:
             True if graceful error handling is present.
         """
-        loader_path = inference_dir / "model_loader.py"
+        loader_path = inference_dir / "artifact_loader.py"
         if not loader_path.exists():
             return False
 

@@ -123,7 +123,7 @@ async def seed() -> None:
             },
         )
 
-        metadata_path = Path(settings.ML_ARTIFACTS_PATH) / "metadata.json"
+        metadata_path = Path(settings.ML_MODELS_PATH) / "metadata.json"
         if metadata_path.exists():
             import json
 
@@ -136,7 +136,7 @@ async def seed() -> None:
                     version=settings.ML_MODEL_VERSION,
                     defaults={
                         "model_type": model_name,
-                        "model_path": str(Path(settings.ML_ARTIFACTS_PATH) / f"{model_name}.pkl"),
+                        "model_path": str(Path(settings.ML_MODELS_PATH) / f"{model_name}.pkl"),
                         "feature_columns": metadata.get("feature_columns", []),
                         "accuracy": metadata.get("metrics", {}).get(model_name, {}).get("accuracy"),
                         "auc_score": metadata.get("metrics", {}).get(model_name, {}).get("auc_score"),

@@ -4,6 +4,7 @@ import { LogOut, Bell, User } from "lucide-react";
 import { useAuthStore } from "../../state/auth";
 import { Breadcrumbs } from "../../components/Breadcrumbs";
 import { MobileNav } from "../../components/MobileNav";
+import { ThemeToggle } from "../../components/ThemeToggle";
 
 export function BusinessTopbar() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export function BusinessTopbar() {
           <span className="business-user-name">{user?.full_name ?? "User"}</span>
           <span className="business-user-role">{user?.role?.name ?? "Retention Manager"}</span>
         </div>
+        <ThemeToggle />
         <motion.button
           className="business-icon-button"
           title="Notifications"

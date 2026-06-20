@@ -8,32 +8,20 @@ import { RoleGuard, isAdminRole } from "./components/RoleGuard";
 
 import { AdminDashboard } from "./panels/admin/pages/AdminDashboard";
 import { UserManagement } from "./panels/admin/pages/UserManagement";
-import { RolesPermissions } from "./panels/admin/pages/RolesPermissions";
 import { DatasetManagement } from "./panels/admin/pages/DatasetManagement";
-import { ModelRegistry } from "./panels/admin/pages/ModelRegistry";
-import { ModelMonitoring } from "./panels/admin/pages/ModelMonitoring";
-import { SystemSettings } from "./panels/admin/pages/SystemSettings";
+import { ModelManagement } from "./panels/admin/pages/ModelManagement";
 import { AuditLogs } from "./panels/admin/pages/AuditLogs";
-import { APIMonitoring } from "./panels/admin/pages/APIMonitoring";
-import { DatabaseHealth } from "./panels/admin/pages/DatabaseHealth";
-import { SecurityCenter } from "./panels/admin/pages/SecurityCenter";
-import { NotificationSettings } from "./panels/admin/pages/NotificationSettings";
 
 import { BusinessDashboard } from "./panels/business/pages/BusinessDashboard";
 import { CustomerExplorer } from "./panels/business/pages/CustomerExplorer";
 import { CustomerProfile } from "./panels/business/pages/CustomerProfile";
 import { ChurnPrediction } from "./panels/business/pages/ChurnPrediction";
-import { ExplainableAI } from "./panels/business/pages/ExplainableAI";
+import { ShapAnalysis } from "./panels/business/pages/ShapAnalysis";
 import { RecommendationCenter } from "./panels/business/pages/RecommendationCenter";
-import { CampaignManagement } from "./panels/business/pages/CampaignManagement";
 import { AnalyticsDashboard } from "./panels/business/pages/AnalyticsDashboard";
-import { Reports } from "./panels/business/pages/Reports";
-import { ProfileSettings } from "./panels/business/pages/ProfileSettings";
 
 import { LandingPage } from "./pages/LandingPage";
 import { AboutPage } from "./pages/AboutPage";
-import { PricingPage } from "./pages/PricingPage";
-import { ContactPage } from "./pages/ContactPage";
 import { SignInPage } from "./pages/SignInPage";
 import { SignUpPage } from "./pages/SignUpPage";
 import { VerifyEmailPage } from "./pages/VerifyEmailPage";
@@ -97,8 +85,6 @@ export default function App() {
       {/* Public marketing pages */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/about" element={<AboutPage />} />
-      <Route path="/pricing" element={<PricingPage />} />
-      <Route path="/contact" element={<ContactPage />} />
 
       {/* Auth pages */}
       <Route path="/signin" element={<SignInPage />} />
@@ -121,17 +107,10 @@ export default function App() {
           }
         >
           <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="users" element={<UserManagement />} />
-          <Route path="roles" element={<RolesPermissions />} />
           <Route path="datasets" element={<DatasetManagement />} />
-          <Route path="models" element={<ModelRegistry />} />
-          <Route path="model-monitoring" element={<ModelMonitoring />} />
-          <Route path="settings" element={<SystemSettings />} />
+          <Route path="models" element={<ModelManagement />} />
+          <Route path="users" element={<UserManagement />} />
           <Route path="audit-logs" element={<AuditLogs />} />
-          <Route path="api-monitoring" element={<APIMonitoring />} />
-          <Route path="database" element={<DatabaseHealth />} />
-          <Route path="security" element={<SecurityCenter />} />
-          <Route path="notifications" element={<NotificationSettings />} />
         </Route>
 
         {/* Business Panel */}
@@ -140,8 +119,6 @@ export default function App() {
           element={
             <RoleGuard
               allowedRoles={[
-                "Super Admin",
-                "Admin",
                 "Retention Manager",
                 "Marketing Manager",
                 "Business Analyst",
@@ -157,12 +134,9 @@ export default function App() {
           <Route path="customers" element={<CustomerExplorer />} />
           <Route path="customers/:id" element={<CustomerProfile />} />
           <Route path="predict" element={<ChurnPrediction />} />
-          <Route path="explain" element={<ExplainableAI />} />
+          <Route path="shap" element={<ShapAnalysis />} />
           <Route path="recommendations" element={<RecommendationCenter />} />
-          <Route path="campaigns" element={<CampaignManagement />} />
           <Route path="analytics" element={<AnalyticsDashboard />} />
-          <Route path="reports" element={<Reports />} />
-          <Route path="settings" element={<ProfileSettings />} />
         </Route>
 
         {/* Redirect root to appropriate panel */}
@@ -171,3 +145,4 @@ export default function App() {
     </Routes>
   );
 }
+

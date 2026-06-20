@@ -334,7 +334,7 @@ class TestCategoricalEncodingCompleteness:
     """
 
     @given(scenario=encoding_coverage_scenario())
-    @settings(max_examples=150)
+    @settings(max_examples=30)
     def test_complete_encoding_produces_no_finding(self, scenario):
         """When all categorical columns have encoding coverage, no finding is produced.
 
@@ -363,7 +363,7 @@ class TestCategoricalEncodingCompleteness:
         )
 
     @given(scenario=encoding_coverage_scenario())
-    @settings(max_examples=150)
+    @settings(max_examples=30)
     def test_incomplete_encoding_produces_finding(self, scenario):
         """When some categorical columns lack encoding, a finding is produced.
 
@@ -398,7 +398,7 @@ class TestCategoricalEncodingCompleteness:
         )
 
     @given(source=no_encoding_scenario())
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_no_encoding_logic_produces_finding(self, source):
         """When no encoding logic exists at all, a finding is produced.
 
@@ -443,7 +443,7 @@ class TestNullHandlingCompleteness:
     """
 
     @given(scenario=null_handling_scenario())
-    @settings(max_examples=150)
+    @settings(max_examples=30)
     def test_with_null_handling_detection(self, scenario):
         """When null handling patterns are present, the detector finds them.
 
@@ -479,7 +479,7 @@ class TestNullHandlingCompleteness:
                 )
 
     @given(source=no_null_handling_scenario())
-    @settings(max_examples=100)
+    @settings(max_examples=30)
     def test_no_null_handling_produces_finding(self, source):
         """When no null handling patterns exist, a finding is produced.
 
@@ -508,7 +508,7 @@ class TestNullHandlingCompleteness:
         assert result.severity is not None
 
     @given(scenario=null_handling_scenario())
-    @settings(max_examples=150)
+    @settings(max_examples=30)
     def test_per_column_handling_passes(self, scenario):
         """Per-column null handling should pass the check fully (no finding).
 

@@ -6,6 +6,7 @@ FastAPI Application Entry Point
 import logging
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
@@ -15,7 +16,8 @@ from app.core.scheduler import start_scheduler, shutdown_scheduler
 from app.exceptions.handlers import register_exception_handlers
 from app.middleware import AuthMiddleware, RateLimitMiddleware, AuditMiddleware
 from app.routes import api_router
-from ml.inference.model_loader import ModelRegistry
+from ml.inference.artifact_loader import ArtifactRegistry
+from ml.explainability.shap_explainer import SHAPExplainer
 
 # Setup structured logging
 setup_logging()
@@ -40,12 +42,17 @@ async def lifespan(app: FastAPI):
         logger.error(f"Database connection error: {e}")
         raise
 
-    # Initialize ML models
+    # Initialize ML artifacts
     try:
-        ModelRegistry.initialize()
-        logger.info("ML models loaded successfully")
+        ArtifactRegistry.initialize(Path(settings.ML_MODELS_PATH))
+        if ArtifactRegistry.is_loaded():
+            logger.info("ML artifacts loaded successfully")
+            SHAPExplainer.initialize()
+            logger.info("SHAP explainer initialized")
+        else:
+            logger.warning("ML artifacts not fully loaded. Continuing without ML inference.")
     except Exception as e:
-        logger.warning(f"ML models not loaded: {e}. Continuing without ML inference.")
+        logger.warning(f"ML artifacts not loaded: {e}. Continuing without ML inference.")
 
     # Start APScheduler for background jobs
     start_scheduler()
@@ -65,7 +72,7 @@ async def lifespan(app: FastAPI):
     logger.info("Database connections closed")
 
     # Cleanup ML resources
-    ModelRegistry.cleanup()
+    ArtifactRegistry.cleanup()
     logger.info("ML resources cleaned up")
 
 
@@ -126,12 +133,13 @@ async def database_health_check():
 async def ml_health_check():
     """ML models health check."""
     try:
-        models_loaded = ModelRegistry.is_loaded()
+        models_loaded = ArtifactRegistry.is_loaded()
+        metadata = ArtifactRegistry.get_metadata() if models_loaded else {}
         return {
             "status": "healthy" if models_loaded else "degraded",
             "component": "ml_models",
             "models_loaded": models_loaded,
-            "model_count": len(ModelRegistry.get_loaded_models()) if models_loaded else 0
+            "metadata": metadata,
         }
     except Exception as e:
         return {

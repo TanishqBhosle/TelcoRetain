@@ -11,7 +11,7 @@ from app.core.security import get_redis
 from app.models.audit import AuditLog, ApiLog
 from app.repositories.audit_repo import AuditRepository
 from app.schemas.admin import SystemHealthResponse, AuditLogResponse, ApiLogResponse
-from ml.inference.model_loader import ModelRegistry
+from ml.inference.artifact_loader import ArtifactRegistry as ModelRegistry
 
 # Capture start time for uptime calculation
 START_TIME = time.time()

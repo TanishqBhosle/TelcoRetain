@@ -1,5 +1,6 @@
 # Python
 __pycache__/
+.hypothesis/
 *.py[cod]
 *.pyo
 *.pyd
@@ -56,3 +57,4 @@ Desktop.ini
 .agents/
 .codex/
 .claude/
+.kiro/

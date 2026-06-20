@@ -77,7 +77,7 @@ def seed():
             print(f"Admin user created: {admin_email}")
 
         # Register ML models from metadata
-        metadata_path = Path(settings.ML_ARTIFACTS_PATH) / "metadata.json"
+        metadata_path = Path(settings.ML_MODELS_PATH) / "metadata.json"
         if metadata_path.exists():
             metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
             for model_name in metadata.get("selected_models", []):
@@ -87,7 +87,7 @@ def seed():
                         name=model_name,
                         version=settings.ML_MODEL_VERSION,
                         model_type=model_name,
-                        model_path=str(Path(settings.ML_ARTIFACTS_PATH) / f"{model_name}.pkl"),
+                        model_path=str(Path(settings.ML_MODELS_PATH) / f"{model_name}.pkl"),
                         feature_columns=metadata.get("feature_columns", []),
                         accuracy=metadata.get("metrics", {}).get(model_name, {}).get("accuracy"),
                         auc_score=metadata.get("metrics", {}).get(model_name, {}).get("auc_score"),

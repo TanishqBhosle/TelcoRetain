@@ -86,8 +86,6 @@ export function LandingPage() {
           <div className="landing-nav-links">
             <Link to="/" className="nav-active">Home</Link>
             <Link to="/about">About</Link>
-            <Link to="/pricing">Pricing</Link>
-            <Link to="/contact">Contact</Link>
             <Link to="/signin" className="btn btn-primary btn-sm">Sign in</Link>
           </div>
           <button
@@ -122,8 +120,6 @@ export function LandingPage() {
               <nav className="mobile-drawer-links">
                 <Link to="/" onClick={() => setMobileNavOpen(false)}>Home</Link>
                 <Link to="/about" onClick={() => setMobileNavOpen(false)}>About</Link>
-                <Link to="/pricing" onClick={() => setMobileNavOpen(false)}>Pricing</Link>
-                <Link to="/contact" onClick={() => setMobileNavOpen(false)}>Contact</Link>
                 <Link to="/signin" className="btn btn-primary btn-sm" onClick={() => setMobileNavOpen(false)}>Sign in</Link>
               </nav>
             </motion.aside>
@@ -157,8 +153,8 @@ export function LandingPage() {
             <Link to="/signup" className="btn btn-primary btn-lg">
               Get Started <ArrowRight size={18} />
             </Link>
-            <Link to="/pricing" className="secondary-button">
-              View Pricing <ArrowRight size={18} />
+            <Link to="/about" className="secondary-button">
+              Learn More <ArrowRight size={18} />
             </Link>
           </motion.div>
         </div>
@@ -230,11 +226,10 @@ export function LandingPage() {
           <span>&copy; {new Date().getFullYear()} TelcoRetain. All rights reserved.</span>
           <div className="footer-links">
             <Link to="/about">About</Link>
-            <Link to="/pricing">Pricing</Link>
-            <Link to="/contact">Contact</Link>
           </div>
         </div>
       </footer>
     </div>
   );
 }
+
